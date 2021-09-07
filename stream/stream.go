@@ -200,6 +200,10 @@ func (join *streamJoin) Tail() Stream {
 ForEach ...
 */
 func ForEach(stream Stream) {
+	if stream == nil {
+		return
+	}
+
 	head := stream
 	for {
 		head.Head()
