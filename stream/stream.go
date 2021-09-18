@@ -14,6 +14,19 @@ type Stream interface {
 /*
 
  */
+type Unit core.Seq
+
+func (unit Unit) Head() core.Values {
+	return core.Seq(unit)
+}
+
+func (unit Unit) Tail() Stream {
+	return nil
+}
+
+/*
+
+ */
 type streamFilter struct {
 	stream Stream
 	filter func(core.Values) bool

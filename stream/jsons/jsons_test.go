@@ -11,31 +11,70 @@ import (
 	"github.com/0xdbf/sigma/stream/jsons"
 )
 
+// [1, 2, 3]
 func TestHorn(t *testing.T) {
 	val := `
 	{
-		"a": {"b": [1, 2, 3]}
+		"a": {"b": 1}
 	}
 	`
 	var gen jsons.Value
 	json.Unmarshal([]byte(val), &gen)
 
-	x := core.Atom("x")
-	y := core.Atom("y")
-	z := core.Atom("z")
-
-	seq := sigma.Head([]core.Value{x, y, z}, jsons.Σ())
+	seq1 := sigma.Head(
+		[]core.Value{core.Atom("a"), core.Atom("b"), core.Atom("c")},
+		jsons.Σ(),
+	)
+	seq2 := sigma.Head(
+		[]core.Value{core.Atom("c"), core.Atom("d"), core.Atom("e")},
+		jsons.Σ(),
+	)
+	seq := sigma.Horn([]core.Value{core.Atom("e")}, seq1, seq2)
 
 	out := seq.Stream(core.Map{
-		core.Atom("x"): gen,
-		core.Atom("y"): core.Atom("a"),
-		core.Atom("z"): core.Any,
+		core.Atom("a"): gen,
+		core.Atom("b"): core.Atom("a"),
+		core.Atom("d"): core.Atom("b"),
 	})
 
 	stream.ForEach(
 		stream.Map(out, func(v core.Values) core.Values {
-			fmt.Println(v)
+			fmt.Println("~~> ", v)
 			return nil
 		}),
 	)
+}
+
+func BenchmarkHorn(b *testing.B) {
+	val := `
+	{
+		"a": {"b": 1}
+	}
+	`
+	var gen jsons.Value
+	json.Unmarshal([]byte(val), &gen)
+
+	seq1 := sigma.Head(
+		[]core.Value{core.Atom("a"), core.Atom("b"), core.Atom("c")},
+		jsons.Σ(),
+	)
+	seq2 := sigma.Head(
+		[]core.Value{core.Atom("c"), core.Atom("d"), core.Atom("e")},
+		jsons.Σ(),
+	)
+	seq := sigma.Horn([]core.Value{core.Atom("e")}, seq1, seq2)
+
+	out := seq.Stream(core.Map{
+		core.Atom("a"): gen,
+		core.Atom("b"): core.Atom("a"),
+		core.Atom("d"): core.Atom("b"),
+	})
+
+	for i := 0; i < b.N; i++ {
+		stream.ForEach(
+			stream.Map(out, func(v core.Values) core.Values {
+				return nil
+			}),
+		)
+	}
 }
