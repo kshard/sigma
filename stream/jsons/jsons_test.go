@@ -46,6 +46,7 @@ func TestHorn(t *testing.T) {
 }
 
 func BenchmarkHorn(b *testing.B) {
+	// TODO: consider integer at atoms
 	val := `
 	{
 		"a": {"b": 1}

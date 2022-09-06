@@ -1,6 +1,8 @@
 package stream
 
-import "github.com/0xdbf/sigma/core"
+import (
+	"github.com/0xdbf/sigma/core"
+)
 
 /*
 

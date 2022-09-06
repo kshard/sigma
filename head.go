@@ -33,5 +33,8 @@ func (h head) stream(heap core.Map) stream.Stream {
 	seq.Copy(h.shape, heap)
 
 	return stream.Map(h.sigma.Stream(seq),
-		func(v core.Values) core.Values { return core.Map{}.Copy(h.shape, v) })
+		func(v core.Values) core.Values {
+			return core.Map{}.Copy(h.shape, v)
+		},
+	)
 }
