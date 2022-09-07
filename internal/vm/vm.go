@@ -1,20 +1,16 @@
 package vm
 
-func Eval(s Stream, h *Heap) error {
-	for {
-		s.Head(h)
-		if err := s.Tail(h); err != nil {
-			return err
-		}
+func Eval(stream Stream, heap *Heap) (err error) {
+	for err = stream.Init(heap); err == nil; err = stream.Read(heap) {
 	}
+
+	return
 }
 
-func Debug(s Stream, h *Heap) error {
-	for {
-		s.Head(h)
-		h.Dump()
-		if err := s.Tail(h); err != nil {
-			return err
-		}
+func Debug(stream Stream, heap *Heap) (err error) {
+	for err = stream.Init(heap); err == nil; err = stream.Read(heap) {
+		heap.Dump()
 	}
+
+	return
 }

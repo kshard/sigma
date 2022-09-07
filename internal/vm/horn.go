@@ -19,8 +19,38 @@ func Eq(x, y []Addr, stream Stream) Stream {
 	return &eq{x: x, y: y, stream: stream}
 }
 
-func (eq *eq) Head(heap *Heap) error {
-	if err := eq.stream.Head(heap); err != nil {
+// func (eq *eq) Head(heap *Heap) error {
+// 	if err := eq.stream.Head(heap); err != nil {
+// 		return err
+// 	}
+
+// 	for i, addr := range eq.x {
+// 		vx := (*heap)[addr].(*any)
+// 		vy := (*heap)[eq.y[i]].(*any)
+// 		if *vx != *vy {
+// 			return eq.Tail(heap)
+// 		}
+
+// 		// switch v := (*heap)[addr].(type) {
+// 		// case *any:
+// 		// 	if *v != eq.seq[i] {
+// 		// 		return eq.Tail(heap)
+// 		// 	}
+// 		// }
+// 	}
+
+// 	return nil
+// }
+
+// func (eq *eq) Tail(heap *Heap) error {
+// 	if err := eq.stream.Tail(heap); err != nil {
+// 		return err
+// 	}
+// 	return eq.Head(heap)
+// }
+
+func (eq *eq) Init(heap *Heap) error {
+	if err := eq.stream.Init(heap); err != nil {
 		return err
 	}
 
@@ -28,23 +58,25 @@ func (eq *eq) Head(heap *Heap) error {
 		vx := (*heap)[addr].(*any)
 		vy := (*heap)[eq.y[i]].(*any)
 		if *vx != *vy {
-			return eq.Tail(heap)
+			return eq.Read(heap)
 		}
-
-		// switch v := (*heap)[addr].(type) {
-		// case *any:
-		// 	if *v != eq.seq[i] {
-		// 		return eq.Tail(heap)
-		// 	}
-		// }
 	}
 
 	return nil
 }
 
-func (eq *eq) Tail(heap *Heap) error {
-	if err := eq.stream.Tail(heap); err != nil {
+func (eq *eq) Read(heap *Heap) error {
+	if err := eq.stream.Read(heap); err != nil {
 		return err
 	}
-	return eq.Head(heap)
+
+	for i, addr := range eq.x {
+		vx := (*heap)[addr].(*any)
+		vy := (*heap)[eq.y[i]].(*any)
+		if *vx != *vy {
+			return eq.Read(heap)
+		}
+	}
+
+	return nil
 }

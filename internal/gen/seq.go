@@ -23,25 +23,21 @@ func NewSeq[A any](addr []vm.Addr, xs [][]A) *Seq[A] {
 	return &Seq[A]{addr: addr, seq: xs, pos: 0}
 }
 
-//
-//
-func (seq *Seq[A]) Head(heap *vm.Heap) error {
+func (seq *Seq[A]) Init(heap *vm.Heap) error {
+	seq.pos = 0
+	return seq.Read(heap)
+}
+
+func (seq *Seq[A]) Read(heap *vm.Heap) error {
+	if len(seq.seq) == seq.pos {
+		return vm.EOS
+	}
+
 	v := seq.seq[seq.pos]
 	for i, addr := range seq.addr {
 		heap.Put(addr, &v[i])
 	}
 
-	return nil
-}
-
-//
-func (seq *Seq[A]) Tail(*vm.Heap) error {
 	seq.pos++
-
-	if len(seq.seq) == seq.pos {
-		seq.pos = 0
-		return vm.EOS
-	}
-
 	return nil
 }

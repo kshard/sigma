@@ -6,7 +6,7 @@ import "fmt"
 
 Addr ... (todo Addr)
 */
-type Addr int
+type Addr uint32
 
 /*
 
@@ -15,7 +15,14 @@ Heap ...
 type Heap []any
 
 func (heap *Heap) Put(addr Addr, val any) {
+	if addr>>31 == 1 {
+		return
+	}
 	(*heap)[addr] = val
+}
+
+func (heap *Heap) Get(addr Addr) any {
+	return (*heap)[addr&0x7fffffff]
 }
 
 func (heap *Heap) Dump() {

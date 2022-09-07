@@ -8,9 +8,9 @@ import (
 
 scalar ...
 */
-type Scalar[A any] struct {
+type Scalar struct {
 	addr vm.Addr
-	seq  []A
+	seq  []any
 	pos  int
 }
 
@@ -19,19 +19,19 @@ type Scalar[A any] struct {
 
 Scalar ...
 */
-func NewScalar[A any](addr vm.Addr, xs []A) *Scalar[A] {
-	return &Scalar[A]{addr: addr, seq: xs, pos: 0}
+func NewScalar(addr vm.Addr, xs []any) *Scalar {
+	return &Scalar{addr: addr, seq: xs, pos: 0}
 }
 
 //
 //
-func (seq *Scalar[A]) Head(heap *vm.Heap) error {
+func (seq *Scalar) Head(heap *vm.Heap) error {
 	heap.Put(seq.addr, &seq.seq[seq.pos])
 	return nil
 }
 
 //
-func (seq *Scalar[A]) Tail(*vm.Heap) error {
+func (seq *Scalar) Tail(*vm.Heap) error {
 	seq.pos++
 
 	if len(seq.seq) == seq.pos {
@@ -39,5 +39,21 @@ func (seq *Scalar[A]) Tail(*vm.Heap) error {
 		return vm.EOS
 	}
 
+	return nil
+}
+
+func (seq *Scalar) Init(heap *vm.Heap) error {
+	seq.pos = 0
+	return seq.Read(heap)
+}
+
+func (seq *Scalar) Read(heap *vm.Heap) error {
+	if len(seq.seq) == seq.pos {
+		return vm.EOS
+	}
+
+	heap.Put(seq.addr, &seq.seq[seq.pos])
+
+	seq.pos++
 	return nil
 }
