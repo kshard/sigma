@@ -8,6 +8,9 @@ Addr ... (todo Addr)
 */
 type Addr uint32
 
+func (addr Addr) Writable() bool { return addr>>31 == 0 }
+func (addr Addr) Value() uint32  { return (uint32(addr) & 0x7fffffff) }
+
 /*
 
 Heap ...
@@ -15,14 +18,18 @@ Heap ...
 type Heap []any
 
 func (heap *Heap) Put(addr Addr, val any) {
-	if addr>>31 == 1 {
+	if !addr.Writable() {
 		return
 	}
 	(*heap)[addr] = val
 }
 
 func (heap *Heap) Get(addr Addr) any {
-	return (*heap)[addr&0x7fffffff]
+	if addr.Writable() {
+		return nil
+	}
+
+	return (*heap)[addr.Value()]
 }
 
 func (heap *Heap) Dump() {

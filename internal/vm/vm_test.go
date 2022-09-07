@@ -56,20 +56,19 @@ func TestXxx(t *testing.T) {
 }
 
 func TestTx(t *testing.T) {
-	movie := vm.Eq(
-		[]vm.Addr{1, 2}, []vm.Addr{3, 4},
-		gen.NewSeq([]vm.Addr{0, 1, 2}, gen.IMDB()),
-	)
+	// movie := vm.Eq(
+	// 	[]vm.Addr{1, 2}, []vm.Addr{3, 4},
+	// 	gen.NewSeq([]vm.Addr{0, 1, 2}, gen.IMDB()),
+	// )
 
-	cast := vm.Eq(
-		[]vm.Addr{0, 6}, []vm.Addr{5, 8},
-		gen.NewSeq([]vm.Addr{5, 6, 7}, gen.IMDB()),
-	)
+	// cast := vm.Eq(
+	// 	[]vm.Addr{0, 6}, []vm.Addr{5, 8},
+	// 	gen.NewSeq([]vm.Addr{5, 6, 7}, gen.IMDB()),
+	// )
 
-	name := vm.Eq(
-		[]vm.Addr{7, 10}, []vm.Addr{9, 12},
-		gen.NewSeq([]vm.Addr{9, 10, 11}, gen.IMDB()),
-	)
+	movie := gen.NewSubQ([]vm.Addr{0, 3 | (1 << 31), 4 | (1 << 31)}, gen.IMDB())
+	cast := gen.NewSubQ([]vm.Addr{0 | (1 << 31), 8 | (1 << 31), 7}, gen.IMDB())
+	name := gen.NewSubQ([]vm.Addr{7 | (1 << 31), 11 | (1 << 31), 10}, gen.IMDB())
 
 	horn := vm.Horn(movie, cast, name)
 
@@ -77,7 +76,25 @@ func TestTx(t *testing.T) {
 	heap[3] = ptr("title")
 	heap[4] = ptr("Lethal Weapon")
 	heap[8] = ptr("cast")
-	heap[12] = ptr("name")
+	heap[11] = ptr("name")
 
 	vm.Debug(horn, &heap)
+}
+
+func BenchmarkTx(bb *testing.B) {
+	movie := gen.NewSubQ([]vm.Addr{0, 3 | (1 << 31), 4 | (1 << 31)}, gen.IMDB())
+	cast := gen.NewSubQ([]vm.Addr{0 | (1 << 31), 8 | (1 << 31), 7}, gen.IMDB())
+	name := gen.NewSubQ([]vm.Addr{7 | (1 << 31), 11 | (1 << 31), 10}, gen.IMDB())
+
+	horn := vm.Horn(movie, cast, name)
+
+	heap := make(vm.Heap, 13)
+	heap[3] = ptr("title")
+	heap[4] = ptr("Lethal Weapon")
+	heap[8] = ptr("cast")
+	heap[11] = ptr("name")
+
+	for i := 0; i < bb.N; i++ {
+		vm.Eval(horn, &heap)
+	}
 }

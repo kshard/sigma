@@ -8,9 +8,9 @@ import (
 
 seq ...
 */
-type Seq[A any] struct {
+type Seq struct {
 	addr []vm.Addr
-	seq  [][]A
+	seq  [][]any
 	pos  int
 }
 
@@ -19,16 +19,16 @@ type Seq[A any] struct {
 
 Stream ...
 */
-func NewSeq[A any](addr []vm.Addr, xs [][]A) *Seq[A] {
-	return &Seq[A]{addr: addr, seq: xs, pos: 0}
+func NewSeq(addr []vm.Addr, xs [][]any) *Seq {
+	return &Seq{addr: addr, seq: xs, pos: 0}
 }
 
-func (seq *Seq[A]) Init(heap *vm.Heap) error {
+func (seq *Seq) Init(heap *vm.Heap) error {
 	seq.pos = 0
 	return seq.Read(heap)
 }
 
-func (seq *Seq[A]) Read(heap *vm.Heap) error {
+func (seq *Seq) Read(heap *vm.Heap) error {
 	if len(seq.seq) == seq.pos {
 		return vm.EOS
 	}
