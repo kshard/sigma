@@ -10,6 +10,13 @@ type Addr uint32
 
 func (addr Addr) Writable() bool { return addr>>31 == 0 }
 func (addr Addr) Value() uint32  { return (uint32(addr) & 0x7fffffff) }
+func (addr Addr) String() string {
+	if addr.Writable() {
+		return fmt.Sprintf("$%d", addr.Value())
+	}
+
+	return fmt.Sprintf("@%d", addr.Value())
+}
 
 /*
 
