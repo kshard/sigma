@@ -25,9 +25,8 @@ type Stream interface {
 streamFMap ...
 */
 type fmap struct {
-	head   Stream
-	tail   Stream
-	closed bool
+	head Stream
+	tail Stream
 }
 
 /*
@@ -35,43 +34,8 @@ type fmap struct {
 FMap ...
 */
 func FMap(head, tail Stream) Stream {
-	return &fmap{head: head, tail: tail, closed: true}
+	return &fmap{head: head, tail: tail}
 }
-
-// /*
-
-// Head ...
-// */
-// func (fmap *fmap) Head(heap *Heap) error {
-// 	if fmap.closed {
-// 		if err := fmap.head.Head(heap); err != nil {
-// 			return err
-// 		}
-// 		fmap.closed = false
-// 	}
-
-// 	return fmap.tail.Head(heap)
-// }
-
-// /*
-
-// Tail ...
-// */
-// func (fmap *fmap) Tail(heap *Heap) error {
-// 	if err := fmap.tail.Tail(heap); err == nil {
-// 		return nil
-// 	}
-
-// 	if err := fmap.head.Tail(heap); err != nil {
-// 		return err
-// 	}
-
-// 	if err := fmap.head.Head(heap); err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
 
 func (fmap *fmap) Init(heap *Heap) error {
 	if err := fmap.head.Init(heap); err != nil {

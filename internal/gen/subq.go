@@ -35,6 +35,7 @@ func (seq *SubQ) Init(heap *vm.Heap) error {
 }
 
 func (seq *SubQ) Read(heap *vm.Heap) error {
+	// heap.Dump()
 	for i, addr := range seq.addr {
 		if !addr.Writable() {
 			seq.pat[i] = *heap.Get(addr).(*any)
@@ -42,6 +43,16 @@ func (seq *SubQ) Read(heap *vm.Heap) error {
 			seq.pat[i] = nil
 		}
 	}
+	// fmt.Println(seq.pat)
+	// panic("xxx")
+
+	// TODO: memory management
+	/*
+		a(x) :- ...
+		b(y, z) :- a(y), a(z)
+
+	*/
+
 	if err := seq.Skip(seq.pat); err != nil {
 		return err
 	}
