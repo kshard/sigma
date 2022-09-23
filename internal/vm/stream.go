@@ -1,14 +1,20 @@
 package vm
 
-import "errors"
+//
+// The file defines stream abstraction and its combinators.
+//
+
+import (
+	"errors"
+)
 
 var EOS = errors.New("end of stream")
 
 /*
 
-Stream ...
+Stream sequence of data elements made available over time.
 
-  for err := stream.Init(&h); err == nil; err = a.Read(&h) {
+  for err := stream.Init(&h); err == nil; err = stream.Read(&h) {
    ...
   }
 
@@ -22,22 +28,30 @@ type Stream interface {
 
 /*
 
-streamFMap ...
+Join is a fundamental stream combinator, it builds a new stream by
+evaluating a tail stream for each element of head stream.
+
+  for err := head.Init(&h); err == nil; err = head.Read(&h) {
+    for err := tail.Init(&h); err == nil; err = tail.Read(&h) {
+      ...
+    }
+  }
+
 */
-type fmap struct {
-	head Stream
-	tail Stream
+func Join(head, tail Stream) Stream {
+	return &join{head: head, tail: tail}
 }
 
 /*
 
-FMap ...
+stream left join operator
 */
-func FMap(head, tail Stream) Stream {
-	return &fmap{head: head, tail: tail}
+type join struct {
+	head Stream
+	tail Stream
 }
 
-func (fmap *fmap) Init(heap *Heap) error {
+func (fmap *join) Init(heap *Heap) error {
 	if err := fmap.head.Init(heap); err != nil {
 		return err
 	}
@@ -49,7 +63,7 @@ func (fmap *fmap) Init(heap *Heap) error {
 	return nil
 }
 
-func (fmap *fmap) Read(heap *Heap) error {
+func (fmap *join) Read(heap *Heap) error {
 	if err := fmap.tail.Read(heap); err == nil {
 		return nil
 	}

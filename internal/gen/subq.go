@@ -30,36 +30,27 @@ func NewSubQ(addr []vm.Addr, xs [][]any) *SubQ {
 }
 
 func (seq *SubQ) Init(heap *vm.Heap) error {
-	seq.pos = 0
-	return seq.Read(heap)
-}
-
-func (seq *SubQ) Read(heap *vm.Heap) error {
-	// heap.Dump()
+	// build sub-query
 	for i, addr := range seq.addr {
-		if !addr.Writable() {
+		if !addr.IsWritable() {
 			seq.pat[i] = *heap.Get(addr).(*any)
 		} else {
 			seq.pat[i] = nil
 		}
 	}
-	// fmt.Println(seq.pat)
-	// panic("xxx")
 
-	// TODO: memory management
-	/*
-		a(x) :- ...
-		b(y, z) :- a(y), a(z)
+	seq.pos = 0
+	return seq.Read(heap)
+}
 
-	*/
-
+func (seq *SubQ) Read(heap *vm.Heap) error {
 	if err := seq.Skip(seq.pat); err != nil {
 		return err
 	}
 
 	v := seq.seq[seq.pos]
 	for i, addr := range seq.addr {
-		if addr.Writable() {
+		if addr.IsWritable() {
 			heap.Put(addr, &v[i])
 		}
 	}

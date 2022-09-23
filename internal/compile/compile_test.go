@@ -1,6 +1,7 @@
 package compile_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/0xdbf/sigma/ast"
@@ -12,7 +13,7 @@ import (
 func TestX(t *testing.T) {
 	e := ast.Rules{
 		&ast.Horn{
-			Head: &ast.Imply{Name: "a", Terms: ast.Terms{{Name: "movie"}, {Name: "cast"}}},
+			Head: &ast.Head{Name: "a", Terms: ast.Terms{{Name: "movie"}, {Name: "cast"}}},
 			Body: ast.Implies{
 				{Name: "f", Terms: ast.Terms{
 					{Name: "m"},
@@ -28,7 +29,7 @@ func TestX(t *testing.T) {
 		},
 
 		&ast.Horn{
-			Head: &ast.Imply{Name: "h", Terms: ast.Terms{{Name: "name"}}},
+			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}, {Name: "name1"}}},
 			Body: ast.Implies{
 				{Name: "a", Terms: ast.Terms{
 					{Name: "t2", Value: "Lethal Weapon"},
@@ -43,11 +44,11 @@ func TestX(t *testing.T) {
 					{Name: "t3", Value: "Mad Max"},
 					{Name: "s"},
 				}},
-				// {Name: "f", Terms: ast.Terms{
-				// 	{Name: "s"},
-				// 	{Name: "n1", Value: "name"},
-				// 	{Name: "name"},
-				// }},
+				{Name: "f", Terms: ast.Terms{
+					{Name: "s"},
+					{Name: "n1", Value: "name"},
+					{Name: "name1"},
+				}},
 			},
 		},
 	}
@@ -58,10 +59,14 @@ func TestX(t *testing.T) {
 	}
 
 	c.Compile(e)
-	// c.Rules["h"](c, nil)
-	h, s := c.Create("h")
-
-	vm.Debug(s, h)
+	value := make([]any, 2)
+	reader := c.Create([]string{"name", "name1"}, "h")
+	for {
+		if err := reader.Read(value); err != nil {
+			break
+		}
+		fmt.Println(value)
+	}
 }
 
 /*
@@ -176,7 +181,7 @@ func TestXxx(t *testing.T) {
 func BenchmarkTx(bb *testing.B) {
 	e := ast.Rules{
 		&ast.Horn{
-			Head: &ast.Imply{Name: "h", Terms: ast.Terms{{Name: "name"}}},
+			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}}},
 			Body: []*ast.Imply{
 				{Name: "f", Terms: ast.Terms{
 					{Name: "m"},
@@ -203,9 +208,13 @@ func BenchmarkTx(bb *testing.B) {
 	}
 
 	c.Compile(e)
-	h, s := c.Create("h")
+	reader := c.Create([]string{"name"}, "h")
 
 	for i := 0; i < bb.N; i++ {
-		vm.Eval(s, h)
+		for {
+			if err := reader.Read(nil); err != nil {
+				break
+			}
+		}
 	}
 }

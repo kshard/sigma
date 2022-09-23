@@ -4,10 +4,7 @@ import (
 	"github.com/0xdbf/sigma/internal/vm"
 )
 
-/*
-
-seq ...
-*/
+// seq type
 type Seq struct {
 	addr []vm.Addr
 	seq  [][]any
@@ -16,11 +13,12 @@ type Seq struct {
 
 /*
 
-
-Stream ...
+Seq generates sequence of values
 */
-func NewSeq(addr []vm.Addr, xs [][]any) *Seq {
-	return &Seq{addr: addr, seq: xs, pos: 0}
+func NewSeq(xs [][]any) func(...vm.Addr) *Seq {
+	return func(addr ...vm.Addr) *Seq {
+		return &Seq{addr: addr, seq: xs, pos: 0}
+	}
 }
 
 func (seq *Seq) Init(heap *vm.Heap) error {
@@ -37,6 +35,39 @@ func (seq *Seq) Read(heap *vm.Heap) error {
 	for i, addr := range seq.addr {
 		heap.Put(addr, &v[i])
 	}
+
+	seq.pos++
+	return nil
+}
+
+//
+type Values struct {
+	addr vm.Addr
+	seq  []any
+	pos  int
+}
+
+/*
+
+Values generates sequence of values
+*/
+func NewValues(xs []any) func(...vm.Addr) *Values {
+	return func(addr ...vm.Addr) *Values {
+		return &Values{addr: addr[0], seq: xs, pos: 0}
+	}
+}
+
+func (seq *Values) Init(heap *vm.Heap) error {
+	seq.pos = 0
+	return seq.Read(heap)
+}
+
+func (seq *Values) Read(heap *vm.Heap) error {
+	if len(seq.seq) == seq.pos {
+		return vm.EOS
+	}
+
+	heap.Put(seq.addr, &seq.seq[seq.pos])
 
 	seq.pos++
 	return nil

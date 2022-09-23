@@ -1,5 +1,9 @@
 package ast
 
+//
+// The file defines abstract syntax tree for expressing on σ-calculus
+//
+
 import "fmt"
 
 //
@@ -12,10 +16,7 @@ const (
 	NodeHorn
 )
 
-//
-// type Term interface{ Term() Kind }
-
-//
+// Term defines complex term expressions of σ-expression
 type Term struct {
 	Name  string
 	Value any
@@ -31,22 +32,16 @@ func (x *Term) String() string {
 	return fmt.Sprintf("$%v", x.Name)
 }
 
+// Terms ordered set
 type Terms []*Term
 
-//
-// type Var struct {
-// 	Name string
-// }
-
-// func (*Var) Term() Kind       { return NodeVar }
-// func (x *Var) String() string { return fmt.Sprintf("$%v", x.Name) }
-
-//
+// σ-expression
 type Imply struct {
 	Name  string
 	Terms Terms
 }
 
+//
 type Implies []*Imply
 
 //
@@ -61,9 +56,11 @@ func (*Fact) Node() Kind { return NodeFact }
 func (*Fact) Rule() Kind { return NodeFact }
 
 //
+type Head Imply
+
+//
 type Horn struct {
-	// TODO: Head Type where only Vars allowed
-	Head *Imply
+	Head *Head
 	Body Implies
 }
 

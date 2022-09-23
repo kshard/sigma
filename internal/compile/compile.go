@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/0xdbf/sigma/ast"
+
 	"github.com/0xdbf/sigma/internal/vm"
 )
 
@@ -33,6 +34,23 @@ func New() *Context {
 	}
 }
 
+func (ctx *Context) Create(head []string, rule string) *vm.Reader {
+	compiler := ctx.Rules[rule]
+	stream := compiler(ctx, nil)
+
+	vmm := vm.New(len(ctx.Heap))
+	for addr, val := range ctx.Const {
+		vmm.Heap.Put(addr, val)
+	}
+
+	addr := make([]vm.Addr, len(head))
+	for i, x := range head {
+		addr[i] = ctx.Heap[x]
+	}
+
+	return vmm.Stream(addr, stream)
+}
+
 func (ctx *Context) Compile(rules ast.Rules) error {
 	for _, rule := range rules {
 		switch horn := rule.(type) {
@@ -42,17 +60,6 @@ func (ctx *Context) Compile(rules ast.Rules) error {
 	}
 
 	return nil
-}
-
-func (ctx *Context) Create(rule string) (*vm.Heap, vm.Stream) {
-	compiler := ctx.Rules[rule]
-	stream := compiler(ctx, nil)
-
-	heap := make(vm.Heap, len(ctx.Heap))
-	for addr, val := range ctx.Const {
-		heap.Put(addr, val)
-	}
-	return &heap, stream
 }
 
 func (ctx *Context) horn(horn *ast.Horn) Compiler {
@@ -93,7 +100,7 @@ func (ctx *Context) horn(horn *ast.Horn) Compiler {
 }
 
 //
-func (ctx *Context) head(head *ast.Imply, args ast.Terms) Refs {
+func (ctx *Context) head(head *ast.Head, args ast.Terms) Refs {
 	terms := Refs{}
 
 	for i, t := range head.Terms {
