@@ -1,7 +1,7 @@
 package gen
 
 import (
-	"github.com/0xdbf/sigma/internal/vm"
+	"github.com/0xdbf/sigma/vm"
 )
 
 // seq type

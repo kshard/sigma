@@ -10,6 +10,9 @@ import (
 
 var EOS = errors.New("end of stream")
 
+//
+type Generator func([]Addr) Stream
+
 /*
 
 Stream sequence of data elements made available over time.

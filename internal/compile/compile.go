@@ -5,7 +5,7 @@ import (
 
 	"github.com/0xdbf/sigma/ast"
 
-	"github.com/0xdbf/sigma/internal/vm"
+	"github.com/0xdbf/sigma/vm"
 )
 
 type Compiler func(*Context, ast.Terms) vm.Stream
@@ -17,8 +17,9 @@ type Refs map[string]*ast.Term
 type Heap map[string]vm.Addr
 
 type Context struct {
+	Signs map[string]*ast.Head
 	Rules Rules
-	Facts map[string]func([]vm.Addr) vm.Stream
+	Facts map[string]vm.Generator
 	Heap  Heap
 	Const map[vm.Addr]any
 	Index int
@@ -26,16 +27,17 @@ type Context struct {
 
 func New() *Context {
 	return &Context{
+		Signs: make(map[string]*ast.Head),
 		Rules: Rules{},
-		Facts: make(map[string]func([]vm.Addr) vm.Stream),
+		Facts: make(map[string]vm.Generator),
 		Heap:  Heap{},
 		Const: make(map[vm.Addr]any),
 		Index: 0,
 	}
 }
 
-func (ctx *Context) Create(head []string, rule string) *vm.Reader {
-	compiler := ctx.Rules[rule]
+func (ctx *Context) Reader(goal string) *vm.Reader {
+	compiler := ctx.Rules[goal]
 	stream := compiler(ctx, nil)
 
 	vmm := vm.New(len(ctx.Heap))
@@ -43,9 +45,10 @@ func (ctx *Context) Create(head []string, rule string) *vm.Reader {
 		vmm.Heap.Put(addr, val)
 	}
 
-	addr := make([]vm.Addr, len(head))
-	for i, x := range head {
-		addr[i] = ctx.Heap[x]
+	head := ctx.Signs[goal]
+	addr := make([]vm.Addr, len(head.Terms))
+	for i, term := range head.Terms {
+		addr[i] = ctx.Heap[term.Name]
 	}
 
 	return vmm.Stream(addr, stream)
@@ -54,7 +57,10 @@ func (ctx *Context) Create(head []string, rule string) *vm.Reader {
 func (ctx *Context) Compile(rules ast.Rules) error {
 	for _, rule := range rules {
 		switch horn := rule.(type) {
+		case *ast.Fact:
+			ctx.Facts[horn.Stream.Name] = horn.Generator(horn.Stream.Terms)
 		case *ast.Horn:
+			ctx.Signs[horn.Head.Name] = horn.Head
 			ctx.Rules[horn.Head.Name] = ctx.horn(horn)
 		}
 	}
@@ -64,14 +70,14 @@ func (ctx *Context) Compile(rules ast.Rules) error {
 
 func (ctx *Context) horn(horn *ast.Horn) Compiler {
 	return func(ctx *Context, args ast.Terms) vm.Stream {
-		fmt.Printf("%s%v => %v\n", horn.Head.Name, args, horn.Head.Terms)
+		// fmt.Printf("%s%v => %v\n", horn.Head.Name, args, horn.Head.Terms)
 		refs := ctx.head(horn.Head, args)
-		fmt.Println(refs)
+		// fmt.Println(refs)
 
 		body := []vm.Stream{}
 		for _, imply := range horn.Body {
 			seq := ctx.stmt(imply.Terms, refs)
-			fmt.Printf("%s%v\n", imply.Name, seq)
+			// fmt.Printf("%s%v\n", imply.Name, seq)
 
 			rule, exists := ctx.Rules[imply.Name]
 			if exists {
@@ -85,7 +91,7 @@ func (ctx *Context) horn(horn *ast.Horn) Compiler {
 				for i, term := range seq {
 					addr[i] = ctx.alloc(term)
 				}
-				fmt.Printf("==> %s%v\n", imply.Name, addr)
+				// fmt.Printf("==> %s%v\n", imply.Name, addr)
 				body = append(body, fact(addr))
 
 				continue

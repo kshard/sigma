@@ -4,7 +4,11 @@ package ast
 // The file defines abstract syntax tree for expressing on σ-calculus
 //
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/0xdbf/sigma/vm"
+)
 
 //
 type Kind int
@@ -50,7 +54,10 @@ type Rule interface{ Rule() Kind }
 type Rules []Rule
 
 //
-type Fact Imply
+type Fact struct {
+	Stream    *Imply
+	Generator func(Terms) vm.Generator
+}
 
 func (*Fact) Node() Kind { return NodeFact }
 func (*Fact) Rule() Kind { return NodeFact }

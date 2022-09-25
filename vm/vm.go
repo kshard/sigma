@@ -60,6 +60,20 @@ type Reader struct {
 	closed bool
 }
 
+func (reader *Reader) ToSeq() [][]any {
+	seq := [][]any{}
+
+	for {
+		val := make([]any, len(reader.addr))
+		if err := reader.Read(val); err != nil {
+			break
+		}
+		seq = append(seq, val)
+	}
+
+	return seq
+}
+
 func (reader *Reader) Read(seq []any) error {
 	if reader.closed {
 		if err := reader.stream.Init(reader.heap); err != nil {

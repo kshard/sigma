@@ -7,11 +7,15 @@ import (
 	"github.com/0xdbf/sigma/ast"
 	"github.com/0xdbf/sigma/internal/compile"
 	"github.com/0xdbf/sigma/internal/gen"
-	"github.com/0xdbf/sigma/internal/vm"
 )
 
 func TestX(t *testing.T) {
 	e := ast.Rules{
+		&ast.Fact{
+			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			Generator: gen.FactsIMDB,
+		},
+
 		&ast.Horn{
 			Head: &ast.Head{Name: "a", Terms: ast.Terms{{Name: "movie"}, {Name: "cast"}}},
 			Body: ast.Implies{
@@ -54,13 +58,10 @@ func TestX(t *testing.T) {
 	}
 
 	c := compile.New()
-	c.Facts["f"] = func(addr []vm.Addr) vm.Stream {
-		return gen.NewSubQ(addr, gen.IMDB())
-	}
-
 	c.Compile(e)
+
 	value := make([]any, 2)
-	reader := c.Create([]string{"name", "name1"}, "h")
+	reader := c.Reader("h")
 	for {
 		if err := reader.Read(value); err != nil {
 			break
@@ -180,6 +181,11 @@ func TestXxx(t *testing.T) {
 
 func BenchmarkTx(bb *testing.B) {
 	e := ast.Rules{
+		&ast.Fact{
+			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			Generator: gen.FactsIMDB,
+		},
+
 		&ast.Horn{
 			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}}},
 			Body: []*ast.Imply{
@@ -203,12 +209,8 @@ func BenchmarkTx(bb *testing.B) {
 	}
 
 	c := compile.New()
-	c.Facts["f"] = func(addr []vm.Addr) vm.Stream {
-		return gen.NewSubQ(addr, gen.IMDB())
-	}
-
 	c.Compile(e)
-	reader := c.Create([]string{"name"}, "h")
+	reader := c.Reader("h")
 
 	for i := 0; i < bb.N; i++ {
 		for {

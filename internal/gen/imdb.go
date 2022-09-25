@@ -1,5 +1,16 @@
 package gen
 
+import (
+	"github.com/0xdbf/sigma/ast"
+	"github.com/0xdbf/sigma/vm"
+)
+
+func FactsIMDB(fields ast.Terms) vm.Generator {
+	return func(addr []vm.Addr) vm.Stream {
+		return NewSubQ(addr, IMDB())
+	}
+}
+
 func IMDB() [][]any {
 	return [][]any{
 		{"urn:person:100", "name", "James Cameron"},
