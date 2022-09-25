@@ -32,7 +32,7 @@ func (x *Term) String() string {
 	return fmt.Sprintf("$%v", x.Name)
 }
 
-// Terms ordered set
+// Terms is the ordered set of terms
 type Terms []*Term
 
 // σ-expression
