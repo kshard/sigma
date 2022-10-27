@@ -22,9 +22,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/0xdbf/sigma"
-	"github.com/0xdbf/sigma/ast"
-	"github.com/0xdbf/sigma/internal/gen"
+	"github.com/kshard/sigma"
+	"github.com/kshard/sigma/ast"
+	"github.com/kshard/sigma/internal/gen"
 )
 
 func queryMatchPerson() sigma.Reader {

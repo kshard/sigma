@@ -25,7 +25,7 @@ package ast
 import (
 	"fmt"
 
-	"github.com/0xdbf/sigma/vm"
+	"github.com/kshard/sigma/vm"
 )
 
 //

@@ -26,7 +26,7 @@ import (
 	"errors"
 )
 
-var EOS = errors.New("end of stream")
+var ErrEndOfStream = errors.New("end of stream")
 
 //
 type Generator func([]Addr) Stream

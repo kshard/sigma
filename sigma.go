@@ -19,8 +19,8 @@
 package sigma
 
 import (
-	"github.com/0xdbf/sigma/ast"
-	"github.com/0xdbf/sigma/internal/compile"
+	"github.com/kshard/sigma/ast"
+	"github.com/kshard/sigma/internal/compile"
 )
 
 //

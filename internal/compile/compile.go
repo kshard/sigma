@@ -21,9 +21,9 @@ package compile
 import (
 	"fmt"
 
-	"github.com/0xdbf/sigma/ast"
+	"github.com/kshard/sigma/ast"
 
-	"github.com/0xdbf/sigma/vm"
+	"github.com/kshard/sigma/vm"
 )
 
 type Compiler func(*Context, ast.Terms) vm.Stream

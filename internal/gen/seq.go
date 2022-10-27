@@ -19,7 +19,7 @@
 package gen
 
 import (
-	"github.com/0xdbf/sigma/vm"
+	"github.com/kshard/sigma/vm"
 )
 
 // seq type
@@ -46,7 +46,7 @@ func (seq *Seq) Init(heap *vm.Heap) error {
 
 func (seq *Seq) Read(heap *vm.Heap) error {
 	if len(seq.seq) == seq.pos {
-		return vm.EOS
+		return vm.ErrEndOfStream
 	}
 
 	v := seq.seq[seq.pos]
@@ -82,7 +82,7 @@ func (seq *Values) Init(heap *vm.Heap) error {
 
 func (seq *Values) Read(heap *vm.Heap) error {
 	if len(seq.seq) == seq.pos {
-		return vm.EOS
+		return vm.ErrEndOfStream
 	}
 
 	heap.Put(seq.addr, &seq.seq[seq.pos])

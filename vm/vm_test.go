@@ -22,8 +22,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/0xdbf/sigma/internal/gen"
-	"github.com/0xdbf/sigma/vm"
+	"github.com/kshard/sigma/internal/gen"
+	"github.com/kshard/sigma/vm"
 )
 
 func TestVmJoin(t *testing.T) {

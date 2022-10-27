@@ -19,8 +19,8 @@
 package gen
 
 import (
-	"github.com/0xdbf/sigma/ast"
-	"github.com/0xdbf/sigma/vm"
+	"github.com/kshard/sigma/ast"
+	"github.com/kshard/sigma/vm"
 )
 
 func FactsIMDB(fields ast.Terms) vm.Generator {

@@ -1,3 +1,3 @@
-module github.com/0xdbf/sigma
+module github.com/kshard/sigma
 
 go 1.18

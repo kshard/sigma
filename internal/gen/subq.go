@@ -19,7 +19,7 @@
 package gen
 
 import (
-	"github.com/0xdbf/sigma/vm"
+	"github.com/kshard/sigma/vm"
 )
 
 /*
@@ -80,7 +80,7 @@ func (seq *SubQ) Read(heap *vm.Heap) error {
 func (seq *SubQ) Skip(val []any) error {
 	for {
 		if len(seq.seq) == seq.pos {
-			return vm.EOS
+			return vm.ErrEndOfStream
 		}
 
 		eq := true
