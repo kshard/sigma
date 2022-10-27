@@ -1,2 +1,3 @@
 # sigma
-σ-functions and its evaluation  
+
+algebra of σ-functions
