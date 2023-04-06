@@ -1,7 +1,7 @@
 /*
 
   Sigma Virtual Machine
-  Copyright (C) 2016  Dmitry Kolesnikov
+  Copyright (C) 2016 - 2023 Dmitry Kolesnikov
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -28,6 +28,7 @@ import (
 	"fmt"
 )
 
+// Kind of ast node
 type Kind int
 
 const (
@@ -62,23 +63,72 @@ type Imply struct {
 	Terms Terms
 }
 
+func (i *Imply) Term(term string, value ...any) *Imply {
+	t := &Term{Name: term}
+	if len(value) != 0 {
+		t.Value = value[0]
+	}
+	i.Terms = append(i.Terms, t)
+
+	return i
+}
+
+func NewImply(name string) *Imply {
+	return &Imply{Name: name, Terms: make(Terms, 0)}
+}
+
+// Sequence of σ-expressions
 type Implies []*Imply
 
+// σ-expression
 type Rule interface{ Rule() Kind }
 
 type Rules []Rule
 
+// σ-expression, Generator of ground facts
+// TODO: deprecate type (see Head)
 type Fact struct {
 	Stream *Imply
-	// Note: we pass generator through context on compile time
-	// Generator func(Terms) vm.Generator
 }
 
 func (*Fact) Node() Kind { return NodeFact }
 func (*Fact) Rule() Kind { return NodeFact }
 
+// Helper configs Fact Node with Terms
+func (f *Fact) Tuple(term ...string) *Fact {
+	for _, t := range term {
+		f.Stream.Terms = append(f.Stream.Terms, &Term{Name: t})
+	}
+
+	return f
+}
+
+// Helper instantiates Fact Node
+func NewFact(name string) *Fact {
+	return &Fact{Stream: &Imply{Name: name, Terms: make(Terms, 0)}}
+}
+
+// Head of Horn clause
 type Head Imply
 
+// Helper configs Fact Node with Terms
+func (f *Head) Tuple(term ...string) *Head {
+	f.Terms = make(Terms, len(term))
+	for i, t := range term {
+		f.Terms[i] = &Term{Name: t}
+	}
+
+	return f
+}
+
+func NewHead(name string) *Head {
+	return &Head{Name: name, Terms: make(Terms, 0)}
+}
+
+// Horn clause is a syntax sugar for the projection (⟻) and join (⨝) operator
+// It joins body and projects result as stream defined by the head.
+//
+//	H ⟻ A ⨝ B ⨝ ... ⨝ C
 type Horn struct {
 	Head *Head
 	Body Implies
@@ -86,3 +136,7 @@ type Horn struct {
 
 func (*Horn) Node() Kind { return NodeHorn }
 func (*Horn) Rule() Kind { return NodeHorn }
+
+func NewHorn(head *Head, imply ...*Imply) *Horn {
+	return &Horn{Head: head, Body: imply}
+}

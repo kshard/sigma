@@ -246,7 +246,6 @@ func BenchmarkTx(bb *testing.B) {
 	e := ast.Rules{
 		&ast.Fact{
 			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			// Generator: gen.FactsIMDB,
 		},
 
 		&ast.Horn{
