@@ -21,19 +21,24 @@
 package compile_test
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
+	"log"
 	"testing"
 
+	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
 	"github.com/kshard/sigma/internal/compile"
 	"github.com/kshard/sigma/internal/gen"
+	"github.com/kshard/sigma/vm"
 )
 
 func TestX(t *testing.T) {
 	e := ast.Rules{
 		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
+			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			// Generator: gen.FactsIMDB,
 		},
 
 		&ast.Horn{
@@ -80,10 +85,48 @@ func TestX(t *testing.T) {
 	c := compile.New()
 	c.Compile(e)
 
+	vmm, addr, reader := c.ReaderX("h")
+	fmt.Println(*vmm, addr, reader)
+
+	// raw, _ := json.Marshal(reader)
+	// fmt.Println(string(raw))
+
+	// var asmx asm.Horn
+	// err := json.Unmarshal(raw, &asmx)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	var buf bytes.Buffer
+	gob.Register(&asm.Generator{})
+	gob.Register(&asm.Horn{})
+	enc := gob.NewEncoder(&buf)
+
+	if err := enc.Encode(reader); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(buf.String())
+
+	var asmx asm.Horn
+	dec := gob.NewDecoder(&buf)
+	if err := dec.Decode(&asmx); err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := &asm.Context{
+		Facts: map[string]vm.Generator{
+			"f": func(addr []vm.Addr) vm.Stream {
+				return gen.NewSubQ(addr, gen.IMDB())
+			},
+		},
+	}
+
 	value := make([]any, 2)
-	reader := c.Reader("h")
+	xreader := vmm.Stream(addr, asmx.Compile(ctx))
+
 	for {
-		if err := reader.Read(value); err != nil {
+		if err := xreader.Read(value); err != nil {
 			break
 		}
 		fmt.Println(value)
@@ -202,8 +245,8 @@ func TestXxx(t *testing.T) {
 func BenchmarkTx(bb *testing.B) {
 	e := ast.Rules{
 		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
+			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			// Generator: gen.FactsIMDB,
 		},
 
 		&ast.Horn{
@@ -230,13 +273,13 @@ func BenchmarkTx(bb *testing.B) {
 
 	c := compile.New()
 	c.Compile(e)
-	reader := c.Reader("h")
+	// reader := c.Reader("h")
 
-	for i := 0; i < bb.N; i++ {
-		for {
-			if err := reader.Read(nil); err != nil {
-				break
-			}
-		}
-	}
+	// for i := 0; i < bb.N; i++ {
+	// 	for {
+	// 		if err := reader.Read(nil); err != nil {
+	// 			break
+	// 		}
+	// 	}
+	// }
 }

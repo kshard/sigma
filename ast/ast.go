@@ -26,11 +26,8 @@ package ast
 
 import (
 	"fmt"
-
-	"github.com/kshard/sigma/vm"
 )
 
-//
 type Kind int
 
 const (
@@ -65,27 +62,23 @@ type Imply struct {
 	Terms Terms
 }
 
-//
 type Implies []*Imply
 
-//
 type Rule interface{ Rule() Kind }
 
 type Rules []Rule
 
-//
 type Fact struct {
-	Stream    *Imply
-	Generator func(Terms) vm.Generator
+	Stream *Imply
+	// Note: we pass generator through context on compile time
+	// Generator func(Terms) vm.Generator
 }
 
 func (*Fact) Node() Kind { return NodeFact }
 func (*Fact) Rule() Kind { return NodeFact }
 
-//
 type Head Imply
 
-//
 type Horn struct {
 	Head *Head
 	Body Implies

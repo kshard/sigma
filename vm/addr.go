@@ -26,10 +26,7 @@ import "fmt"
 // The file defines heap address
 //
 
-/*
-
-Addr is data type on defining heap addresses
-*/
+// Addr is data type on defining heap addresses
 type Addr uint32
 
 const (

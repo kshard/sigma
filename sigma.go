@@ -39,5 +39,7 @@ type Reader interface {
 func New(goal string, rules ast.Rules) Reader {
 	c := compile.New()
 	c.Compile(rules)
-	return c.Reader(goal)
+	// vmm, addr, reader := c.ReaderX(goal)
+	// return vmm.Stream(addr, reader.Compile())
+	return nil
 }
