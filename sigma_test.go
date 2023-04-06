@@ -26,14 +26,13 @@ import (
 
 	"github.com/kshard/sigma"
 	"github.com/kshard/sigma/ast"
-	"github.com/kshard/sigma/internal/gen"
 )
 
 func queryMatchPerson() sigma.Reader {
 	rules := ast.Rules{
 		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
+			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			// Generator: gen.FactsIMDB,
 		},
 
 		&ast.Horn{
@@ -75,8 +74,8 @@ func BenchmarkBasicQueryMatchPerson(b *testing.B) {
 func queryMatchMovieByYear() sigma.Reader {
 	rules := ast.Rules{
 		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
+			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			// Generator: gen.FactsIMDB,
 		},
 
 		&ast.Horn{
@@ -128,8 +127,8 @@ func BenchmarkBasicQueryMatchMovieByYear(b *testing.B) {
 func queryDiscoverAllActorsFromMovie() sigma.Reader {
 	rules := ast.Rules{
 		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
+			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+			// Generator: gen.FactsIMDB,
 		},
 
 		&ast.Horn{

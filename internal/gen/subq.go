@@ -25,7 +25,6 @@ import (
 )
 
 /*
-
 seq ...
 */
 type SubQ struct {
@@ -36,8 +35,6 @@ type SubQ struct {
 }
 
 /*
-
-
 Stream ...
 */
 func NewSubQ(addr []vm.Addr, xs [][]any) *SubQ {
@@ -82,7 +79,7 @@ func (seq *SubQ) Read(heap *vm.Heap) error {
 func (seq *SubQ) Skip(val []any) error {
 	for {
 		if len(seq.seq) == seq.pos {
-			return vm.ErrEndOfStream
+			return vm.EndOfStream
 		}
 
 		eq := true

@@ -32,7 +32,6 @@ type Seq struct {
 }
 
 /*
-
 Seq generates sequence of values
 */
 func NewSeq(xs [][]any) func(...vm.Addr) *Seq {
@@ -48,7 +47,7 @@ func (seq *Seq) Init(heap *vm.Heap) error {
 
 func (seq *Seq) Read(heap *vm.Heap) error {
 	if len(seq.seq) == seq.pos {
-		return vm.ErrEndOfStream
+		return vm.EndOfStream
 	}
 
 	v := seq.seq[seq.pos]
@@ -60,7 +59,6 @@ func (seq *Seq) Read(heap *vm.Heap) error {
 	return nil
 }
 
-//
 type Values struct {
 	addr vm.Addr
 	seq  []any
@@ -68,7 +66,6 @@ type Values struct {
 }
 
 /*
-
 Values generates sequence of values
 */
 func NewValues(xs []any) func(...vm.Addr) *Values {
@@ -84,7 +81,7 @@ func (seq *Values) Init(heap *vm.Heap) error {
 
 func (seq *Values) Read(heap *vm.Heap) error {
 	if len(seq.seq) == seq.pos {
-		return vm.ErrEndOfStream
+		return vm.EndOfStream
 	}
 
 	heap.Put(seq.addr, &seq.seq[seq.pos])
