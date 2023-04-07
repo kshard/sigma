@@ -73,7 +73,7 @@ func (i *Imply) Term(term string, value ...any) *Imply {
 	return i
 }
 
-func NewImply(name string) *Imply {
+func NewExpr(name string) *Imply {
 	return &Imply{Name: name, Terms: make(Terms, 0)}
 }
 

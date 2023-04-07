@@ -63,3 +63,12 @@ func Stream(ctx *asm.Context, vm *VM) Reader {
 	stream := vm.Code.Link(ctx)
 	return vm.Machine.Stream(vm.Shape, stream)
 }
+
+func NewReader(ctx *asm.Context, goal string, rules ast.Rules) (Reader, error) {
+	machine, err := New(goal, rules)
+	if err != nil {
+		return nil, err
+	}
+
+	return Stream(ctx, machine), nil
+}
