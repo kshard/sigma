@@ -26,10 +26,7 @@ import "fmt"
 // The file defines random access memory (heap) model for VM.
 //
 
-/*
-
-Heap of VM
-*/
+// Heap of VM
 type Heap []any
 
 // Put writes value to heap by the address

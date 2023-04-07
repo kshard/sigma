@@ -18,70 +18,65 @@
 
 */
 
-package compile_test
+package compiler_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
-	"github.com/kshard/sigma/internal/compile"
+	"github.com/kshard/sigma/internal/compiler"
 	"github.com/kshard/sigma/internal/gen"
 )
 
 func TestX(t *testing.T) {
-	e := ast.Rules{
-		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
-		},
+	rules := ast.Rules{
+		ast.NewFact("f").Tuple("s", "p", "o"),
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "a", Terms: ast.Terms{{Name: "movie"}, {Name: "cast"}}},
-			Body: ast.Implies{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "m"},
-					{Name: "t1", Value: "title"},
-					{Name: "movie"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "m"},
-					{Name: "c1", Value: "cast"},
-					{Name: "cast"},
-				}},
-			},
-		},
+		ast.NewHorn(
+			ast.NewHead("a").Tuple("movie", "cast"),
+			ast.NewExpr("f").
+				Term("m").
+				Term("t1", "title").
+				Term("movie"),
+			ast.NewExpr("f").
+				Term("m").
+				Term("c1", "cast").
+				Term("cast"),
+		),
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}, {Name: "name1"}}},
-			Body: ast.Implies{
-				{Name: "a", Terms: ast.Terms{
-					{Name: "t2", Value: "Lethal Weapon"},
-					{Name: "p"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "p"},
-					{Name: "n1", Value: "name"},
-					{Name: "name"},
-				}},
-				{Name: "a", Terms: ast.Terms{
-					{Name: "t3", Value: "Mad Max"},
-					{Name: "s"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "n1", Value: "name"},
-					{Name: "name1"},
-				}},
-			},
-		},
+		ast.NewHorn(
+			ast.NewHead("h").Tuple("name", "name1"),
+			ast.NewExpr("a").
+				Term("t2", "Lethal Weapon").
+				Term("p"),
+			ast.NewExpr("f").
+				Term("p").
+				Term("n1", "name").
+				Term("name"),
+			ast.NewExpr("a").
+				Term("t3", "Mad Max").
+				Term("s"),
+			ast.NewExpr("f").
+				Term("s").
+				Term("n1", "name").
+				Term("name1"),
+		),
 	}
 
-	c := compile.New()
-	c.Compile(e)
+	build := compiler.New()
+	if err := build.Compile(rules); err != nil {
+		panic(err)
+	}
 
-	value := make([]any, 2)
-	reader := c.Reader("h")
+	machine, shape, code := build.Assemble("h")
+
+	ctx := asm.NewContext().Add("f", gen.FactsIMDB)
+	reader := machine.Stream(shape, code.Link(ctx))
+
+	value := make([]any, len(shape))
+
 	for {
 		if err := reader.Read(value); err != nil {
 			break
@@ -202,8 +197,7 @@ func TestXxx(t *testing.T) {
 func BenchmarkTx(bb *testing.B) {
 	e := ast.Rules{
 		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
+			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
 		},
 
 		&ast.Horn{
@@ -228,15 +222,15 @@ func BenchmarkTx(bb *testing.B) {
 		},
 	}
 
-	c := compile.New()
+	c := compiler.New()
 	c.Compile(e)
-	reader := c.Reader("h")
+	// reader := c.Reader("h")
 
-	for i := 0; i < bb.N; i++ {
-		for {
-			if err := reader.Read(nil); err != nil {
-				break
-			}
-		}
-	}
+	// for i := 0; i < bb.N; i++ {
+	// 	for {
+	// 		if err := reader.Read(nil); err != nil {
+	// 			break
+	// 		}
+	// 	}
+	// }
 }

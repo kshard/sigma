@@ -1,7 +1,7 @@
 /*
 
   Sigma Virtual Machine
-  Copyright (C) 2016  Dmitry Kolesnikov
+  Copyright (C) 2016 - 2023 Dmitry Kolesnikov
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -21,8 +21,10 @@
 package sigma
 
 import (
+	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
-	"github.com/kshard/sigma/internal/compile"
+	"github.com/kshard/sigma/internal/compiler"
+	"github.com/kshard/sigma/vm"
 )
 
 //
@@ -35,9 +37,38 @@ type Reader interface {
 	Read([]any) error
 }
 
-// New creates a new Reader
-func New(goal string, rules ast.Rules) Reader {
-	c := compile.New()
-	c.Compile(rules)
-	return c.Reader(goal)
+type VM struct {
+	Machine *vm.VM
+	Shape   []vm.Addr
+	Code    asm.Stream
+}
+
+// Create instance of VM
+func New(goal string, rules ast.Rules) (*VM, error) {
+	sc := compiler.New()
+	if err := sc.Compile(rules); err != nil {
+		return nil, err
+	}
+
+	machine, shape, code := sc.Assemble(goal)
+
+	return &VM{
+		Machine: machine,
+		Shape:   shape,
+		Code:    code,
+	}, nil
+}
+
+func Stream(ctx *asm.Context, vm *VM) Reader {
+	stream := vm.Code.Link(ctx)
+	return vm.Machine.Stream(vm.Shape, stream)
+}
+
+func NewReader(ctx *asm.Context, goal string, rules ast.Rules) (Reader, error) {
+	machine, err := New(goal, rules)
+	if err != nil {
+		return nil, err
+	}
+
+	return Stream(ctx, machine), nil
 }

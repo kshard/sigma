@@ -25,30 +25,29 @@ import (
 	"testing"
 
 	"github.com/kshard/sigma"
+	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
 	"github.com/kshard/sigma/internal/gen"
 )
 
 func queryMatchPerson() sigma.Reader {
 	rules := ast.Rules{
-		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
-		},
-
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "s"}}},
-			Body: []*ast.Imply{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "t1", Value: "name"},
-					{Name: "t2", Value: "Ridley Scott"},
-				}},
-			},
-		},
+		ast.NewFact("f").Tuple("s", "p", "o"),
+		ast.NewHorn(
+			ast.NewHead("h").Tuple("s"),
+			ast.NewExpr("f").
+				Term("s").
+				Term("t1", "name").
+				Term("t2", "Ridley Scott"),
+		),
 	}
 
-	return sigma.New("h", rules)
+	reader, err := sigma.NewReader(asm.NewContext().Add("f", gen.FactsIMDB), "h", rules)
+	if err != nil {
+		panic(err)
+	}
+
+	return reader
 }
 
 func TestBasicQueryMatchPerson(t *testing.T) {
@@ -74,29 +73,27 @@ func BenchmarkBasicQueryMatchPerson(b *testing.B) {
 
 func queryMatchMovieByYear() sigma.Reader {
 	rules := ast.Rules{
-		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
-		},
+		ast.NewFact("f").Tuple("s", "p", "o"),
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "s"}, {Name: "title"}}},
-			Body: []*ast.Imply{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "t1", Value: "year"},
-					{Name: "t2", Value: 1987},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "t3", Value: "title"},
-					{Name: "title"},
-				}},
-			},
-		},
+		ast.NewHorn(
+			ast.NewHead("h").Tuple("s", "title"),
+			ast.NewExpr("f").
+				Term("s").
+				Term("t1", "year").
+				Term("t2", 1987),
+			ast.NewExpr("f").
+				Term("s").
+				Term("t3", "title").
+				Term("title"),
+		),
 	}
 
-	return sigma.New("h", rules)
+	reader, err := sigma.NewReader(asm.NewContext().Add("f", gen.FactsIMDB), "h", rules)
+	if err != nil {
+		panic(err)
+	}
+
+	return reader
 }
 
 func TestBasicQueryMatchMovieByYear(t *testing.T) {
@@ -127,34 +124,31 @@ func BenchmarkBasicQueryMatchMovieByYear(b *testing.B) {
 
 func queryDiscoverAllActorsFromMovie() sigma.Reader {
 	rules := ast.Rules{
-		&ast.Fact{
-			Stream:    &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			Generator: gen.FactsIMDB,
-		},
+		ast.NewFact("f").Tuple("s", "p", "o"),
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}}},
-			Body: []*ast.Imply{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "m"},
-					{Name: "t1", Value: "title"},
-					{Name: "t2", Value: "Lethal Weapon"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "m"},
-					{Name: "t3", Value: "cast"},
-					{Name: "p"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "p"},
-					{Name: "t4", Value: "name"},
-					{Name: "name"},
-				}},
-			},
-		},
+		ast.NewHorn(
+			ast.NewHead("h").Tuple("name"),
+			ast.NewExpr("f").
+				Term("m").
+				Term("t1", "title").
+				Term("t2", "Lethal Weapon"),
+			ast.NewExpr("f").
+				Term("m").
+				Term("t3", "cast").
+				Term("p"),
+			ast.NewExpr("f").
+				Term("p").
+				Term("t4", "name").
+				Term("name"),
+		),
 	}
 
-	return sigma.New("h", rules)
+	reader, err := sigma.NewReader(asm.NewContext().Add("f", gen.FactsIMDB), "h", rules)
+	if err != nil {
+		panic(err)
+	}
+
+	return reader
 }
 
 func TestBasicQueryDiscoverAllActorsFromMovie(t *testing.T) {
@@ -179,5 +173,11 @@ func BenchmarkBasicQueryDiscoverAllActorsFromMovie(b *testing.B) {
 				break
 			}
 		}
+	}
+}
+
+func BenchmarkCompileBasicQueryDiscoverAllActorsFromMovie(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		queryDiscoverAllActorsFromMovie()
 	}
 }

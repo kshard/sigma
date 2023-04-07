@@ -1,7 +1,7 @@
 /*
 
   Sigma Virtual Machine
-  Copyright (C) 2016  Dmitry Kolesnikov
+  Copyright (C) 2016 - 2023 Dmitry Kolesnikov
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -18,31 +18,11 @@
 
 */
 
-package vm
-
-import "fmt"
-
+// Package ast defines abstract syntax tree for expressing on σ-calculus
 //
-// The file defines heap address
+// Examples on the usage of ast
+// Generator is a σ-expressions producing stream of binary relations
+// imdb(s, p, o) ⇒ ⟨subject, predicate, object⟩.
 //
-
-// Addr is data type on defining heap addresses
-type Addr uint32
-
-const (
-	fReadOnly = 1 << 31
-	fAddrMask = 0x7fffffff
-)
-
-func (addr Addr) ReadOnly() Addr { return addr | fReadOnly }
-
-func (addr Addr) IsWritable() bool { return addr&fReadOnly == 0 }
-func (addr Addr) Value() uint32    { return (uint32(addr) & fAddrMask) }
-func (addr Addr) String() string {
-	f := "r"
-	if addr.IsWritable() {
-		f = "w"
-	}
-
-	return fmt.Sprintf("%s%d", f, addr.Value())
-}
+//	&ast.Fact{Stream: }
+package ast
