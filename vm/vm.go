@@ -20,7 +20,9 @@
 
 package vm
 
-import "errors"
+import (
+	"errors"
+)
 
 //
 // The file implements Sigma VM

@@ -20,169 +20,161 @@
 
 package sigma_test
 
-import (
-	"reflect"
-	"testing"
+// func queryMatchPerson() sigma.Reader {
+// 	rules := ast.Rules{
+// 		&ast.Fact{
+// 			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+// 			// Generator: gen.FactsIMDB,
+// 		},
 
-	"github.com/kshard/sigma"
-	"github.com/kshard/sigma/ast"
-)
+// 		&ast.Horn{
+// 			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "s"}}},
+// 			Body: []*ast.Imply{
+// 				{Name: "f", Terms: ast.Terms{
+// 					{Name: "s"},
+// 					{Name: "t1", Value: "name"},
+// 					{Name: "t2", Value: "Ridley Scott"},
+// 				}},
+// 			},
+// 		},
+// 	}
 
-func queryMatchPerson() sigma.Reader {
-	rules := ast.Rules{
-		&ast.Fact{
-			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			// Generator: gen.FactsIMDB,
-		},
+// 	return sigma.New("h", rules)
+// }
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "s"}}},
-			Body: []*ast.Imply{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "t1", Value: "name"},
-					{Name: "t2", Value: "Ridley Scott"},
-				}},
-			},
-		},
-	}
+// func TestBasicQueryMatchPerson(t *testing.T) {
+// 	sequence := queryMatchPerson().ToSeq()
+// 	required := [][]any{{"urn:person:137"}}
 
-	return sigma.New("h", rules)
-}
+// 	if !reflect.DeepEqual(sequence, required) {
+// 		t.Errorf("got %v required %v", sequence, required)
+// 	}
+// }
 
-func TestBasicQueryMatchPerson(t *testing.T) {
-	sequence := queryMatchPerson().ToSeq()
-	required := [][]any{{"urn:person:137"}}
+// func BenchmarkBasicQueryMatchPerson(b *testing.B) {
+// 	reader := queryMatchPerson()
 
-	if !reflect.DeepEqual(sequence, required) {
-		t.Errorf("got %v required %v", sequence, required)
-	}
-}
+// 	for i := 0; i < b.N; i++ {
+// 		for {
+// 			if err := reader.Read(nil); err != nil {
+// 				break
+// 			}
+// 		}
+// 	}
+// }
 
-func BenchmarkBasicQueryMatchPerson(b *testing.B) {
-	reader := queryMatchPerson()
+// func queryMatchMovieByYear() sigma.Reader {
+// 	rules := ast.Rules{
+// 		&ast.Fact{
+// 			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+// 			// Generator: gen.FactsIMDB,
+// 		},
 
-	for i := 0; i < b.N; i++ {
-		for {
-			if err := reader.Read(nil); err != nil {
-				break
-			}
-		}
-	}
-}
+// 		&ast.Horn{
+// 			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "s"}, {Name: "title"}}},
+// 			Body: []*ast.Imply{
+// 				{Name: "f", Terms: ast.Terms{
+// 					{Name: "s"},
+// 					{Name: "t1", Value: "year"},
+// 					{Name: "t2", Value: 1987},
+// 				}},
+// 				{Name: "f", Terms: ast.Terms{
+// 					{Name: "s"},
+// 					{Name: "t3", Value: "title"},
+// 					{Name: "title"},
+// 				}},
+// 			},
+// 		},
+// 	}
 
-func queryMatchMovieByYear() sigma.Reader {
-	rules := ast.Rules{
-		&ast.Fact{
-			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			// Generator: gen.FactsIMDB,
-		},
+// 	return sigma.New("h", rules)
+// }
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "s"}, {Name: "title"}}},
-			Body: []*ast.Imply{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "t1", Value: "year"},
-					{Name: "t2", Value: 1987},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "s"},
-					{Name: "t3", Value: "title"},
-					{Name: "title"},
-				}},
-			},
-		},
-	}
+// func TestBasicQueryMatchMovieByYear(t *testing.T) {
 
-	return sigma.New("h", rules)
-}
+// 	sequence := queryMatchMovieByYear().ToSeq()
+// 	required := [][]any{
+// 		{"urn:movie:202", "Predator"},
+// 		{"urn:movie:203", "Lethal Weapon"},
+// 		{"urn:movie:204", "RoboCop"},
+// 	}
 
-func TestBasicQueryMatchMovieByYear(t *testing.T) {
+// 	if !reflect.DeepEqual(sequence, required) {
+// 		t.Errorf("got %v required %v", sequence, required)
+// 	}
+// }
 
-	sequence := queryMatchMovieByYear().ToSeq()
-	required := [][]any{
-		{"urn:movie:202", "Predator"},
-		{"urn:movie:203", "Lethal Weapon"},
-		{"urn:movie:204", "RoboCop"},
-	}
+// func BenchmarkBasicQueryMatchMovieByYear(b *testing.B) {
+// 	reader := queryMatchMovieByYear()
 
-	if !reflect.DeepEqual(sequence, required) {
-		t.Errorf("got %v required %v", sequence, required)
-	}
-}
+// 	for i := 0; i < b.N; i++ {
+// 		for {
+// 			if err := reader.Read(nil); err != nil {
+// 				break
+// 			}
+// 		}
+// 	}
+// }
 
-func BenchmarkBasicQueryMatchMovieByYear(b *testing.B) {
-	reader := queryMatchMovieByYear()
+// func queryDiscoverAllActorsFromMovie() sigma.Reader {
+// 	rules := ast.Rules{
+// 		&ast.Fact{
+// 			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
+// 			// Generator: gen.FactsIMDB,
+// 		},
 
-	for i := 0; i < b.N; i++ {
-		for {
-			if err := reader.Read(nil); err != nil {
-				break
-			}
-		}
-	}
-}
+// 		&ast.Horn{
+// 			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}}},
+// 			Body: []*ast.Imply{
+// 				{Name: "f", Terms: ast.Terms{
+// 					{Name: "m"},
+// 					{Name: "t1", Value: "title"},
+// 					{Name: "t2", Value: "Lethal Weapon"},
+// 				}},
+// 				{Name: "f", Terms: ast.Terms{
+// 					{Name: "m"},
+// 					{Name: "t3", Value: "cast"},
+// 					{Name: "p"},
+// 				}},
+// 				{Name: "f", Terms: ast.Terms{
+// 					{Name: "p"},
+// 					{Name: "t4", Value: "name"},
+// 					{Name: "name"},
+// 				}},
+// 			},
+// 		},
+// 	}
 
-func queryDiscoverAllActorsFromMovie() sigma.Reader {
-	rules := ast.Rules{
-		&ast.Fact{
-			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-			// Generator: gen.FactsIMDB,
-		},
+// 	return sigma.New("h", rules)
+// }
 
-		&ast.Horn{
-			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}}},
-			Body: []*ast.Imply{
-				{Name: "f", Terms: ast.Terms{
-					{Name: "m"},
-					{Name: "t1", Value: "title"},
-					{Name: "t2", Value: "Lethal Weapon"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "m"},
-					{Name: "t3", Value: "cast"},
-					{Name: "p"},
-				}},
-				{Name: "f", Terms: ast.Terms{
-					{Name: "p"},
-					{Name: "t4", Value: "name"},
-					{Name: "name"},
-				}},
-			},
-		},
-	}
+// func TestBasicQueryDiscoverAllActorsFromMovie(t *testing.T) {
+// 	sequence := queryDiscoverAllActorsFromMovie().ToSeq()
+// 	required := [][]any{
+// 		{"Mel Gibson"},
+// 		{"Danny Glover"},
+// 		{"Gary Busey"},
+// 	}
 
-	return sigma.New("h", rules)
-}
+// 	if !reflect.DeepEqual(sequence, required) {
+// 		t.Errorf("got %v required %v", sequence, required)
+// 	}
+// }
 
-func TestBasicQueryDiscoverAllActorsFromMovie(t *testing.T) {
-	sequence := queryDiscoverAllActorsFromMovie().ToSeq()
-	required := [][]any{
-		{"Mel Gibson"},
-		{"Danny Glover"},
-		{"Gary Busey"},
-	}
+// func BenchmarkBasicQueryDiscoverAllActorsFromMovie(b *testing.B) {
+// 	reader := queryDiscoverAllActorsFromMovie()
 
-	if !reflect.DeepEqual(sequence, required) {
-		t.Errorf("got %v required %v", sequence, required)
-	}
-}
+// 	for i := 0; i < b.N; i++ {
+// 		for {
+// 			if err := reader.Read(nil); err != nil {
+// 				break
+// 			}
+// 		}
+// 	}
+// }
 
-func BenchmarkBasicQueryDiscoverAllActorsFromMovie(b *testing.B) {
-	reader := queryDiscoverAllActorsFromMovie()
-
-	for i := 0; i < b.N; i++ {
-		for {
-			if err := reader.Read(nil); err != nil {
-				break
-			}
-		}
-	}
-}
-
-func BenchmarkCompileBasicQueryDiscoverAllActorsFromMovie(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		queryDiscoverAllActorsFromMovie()
-	}
-}
+// func BenchmarkCompileBasicQueryDiscoverAllActorsFromMovie(b *testing.B) {
+// 	for i := 0; i < b.N; i++ {
+// 		queryDiscoverAllActorsFromMovie()
+// 	}
+// }

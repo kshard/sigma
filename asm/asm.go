@@ -31,16 +31,26 @@ import (
 // The file defines byte-code (assembler) for expressing on σ-calculus
 //
 
+// Context for linker
 type Context struct {
 	Facts map[string]vm.Generator
 }
 
-//
-type Stream interface {
-	Compile(*Context) vm.Stream
+func (ctx *Context) Add(id string, gen vm.Generator) *Context {
+	ctx.Facts[id] = gen
+	return ctx
 }
 
-//
+func NewContext() *Context {
+	return &Context{
+		Facts: make(map[string]vm.Generator),
+	}
+}
+
+type Stream interface {
+	Link(*Context) vm.Stream
+}
+
 type Generator struct {
 	Name string
 	Addr []vm.Addr
@@ -59,7 +69,7 @@ func (gen *Generator) String() string {
 	return buffer.String()
 }
 
-func (gen *Generator) Compile(ctx *Context) vm.Stream {
+func (gen *Generator) Link(ctx *Context) vm.Stream {
 	fact, exists := ctx.Facts[gen.Name]
 	if !exists {
 		panic(fmt.Errorf("unknown %v", gen.Name))
@@ -68,7 +78,6 @@ func (gen *Generator) Compile(ctx *Context) vm.Stream {
 	return fact(gen.Addr)
 }
 
-//
 type Horn struct {
 	Body []Stream
 }
@@ -87,10 +96,10 @@ func (horn *Horn) String() string {
 	return buffer.String()
 }
 
-func (horn *Horn) Compile(ctx *Context) vm.Stream {
+func (horn *Horn) Link(ctx *Context) vm.Stream {
 	seq := make([]vm.Stream, len(horn.Body))
 	for i, f := range horn.Body {
-		seq[i] = f.Compile(ctx)
+		seq[i] = f.Link(ctx)
 	}
 
 	return vm.Horn(seq...)

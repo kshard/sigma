@@ -1,7 +1,7 @@
 /*
 
   Sigma Virtual Machine
-  Copyright (C) 2016 - 2023 Dmitry Kolesnikov
+  Copyright (C) 2016 - 2023  Dmitry Kolesnikov
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -21,45 +21,46 @@
 package sigma
 
 import (
+	"bytes"
+	"encoding/gob"
+
 	"github.com/kshard/sigma/asm"
-	"github.com/kshard/sigma/ast"
-	"github.com/kshard/sigma/internal/compiler"
 	"github.com/kshard/sigma/vm"
 )
 
-//
-// The file defines public api for Sigma VM
-//
+func init() {
+	var (
+		tstring string
+		astring any = &tstring
+		tint    int
+		aint    any = &tint
+	)
 
-// Reader is a stream produced by evaluation of rules
-type Reader interface {
-	ToSeq() [][]any
-	Read([]any) error
+	gob.Register(&asm.Generator{})
+	gob.Register(&asm.Horn{})
+	gob.Register(&vm.VM{})
+	gob.Register(&astring)
+	gob.Register(&aint)
 }
 
-type VM struct {
-	Machine *vm.VM
-	Shape   []vm.Addr
-	Code    asm.Stream
-}
+func Encode(vm *VM) ([]byte, error) {
+	var buf bytes.Buffer
+	codec := gob.NewEncoder(&buf)
 
-// Create instance of VM
-func New(goal string, rules ast.Rules) (*VM, error) {
-	sc := compiler.New()
-	if err := sc.Compile(rules); err != nil {
+	if err := codec.Encode(vm); err != nil {
 		return nil, err
 	}
 
-	machine, shape, code := sc.Assemble(goal)
-
-	return &VM{
-		Machine: machine,
-		Shape:   shape,
-		Code:    code,
-	}, nil
+	return buf.Bytes(), nil
 }
 
-func Stream(ctx *asm.Context, vm *VM) Reader {
-	stream := vm.Code.Link(ctx)
-	return vm.Machine.Stream(vm.Shape, stream)
+func Decode(buf []byte) (*VM, error) {
+	var vm VM
+	codec := gob.NewDecoder(bytes.NewBuffer(buf))
+
+	if err := codec.Decode(&vm); err != nil {
+		return nil, err
+	}
+
+	return &vm, nil
 }

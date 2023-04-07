@@ -21,14 +21,11 @@
 package gen
 
 import (
-	"github.com/kshard/sigma/ast"
 	"github.com/kshard/sigma/vm"
 )
 
-func FactsIMDB(fields ast.Terms) vm.Generator {
-	return func(addr []vm.Addr) vm.Stream {
-		return NewSubQ(addr, IMDB())
-	}
+func FactsIMDB(addr []vm.Addr) vm.Stream {
+	return NewSubQ(addr, IMDB())
 }
 
 func IMDB() [][]any {

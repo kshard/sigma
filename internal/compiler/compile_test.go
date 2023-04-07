@@ -18,7 +18,7 @@
 
 */
 
-package compile_test
+package compiler_test
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ import (
 
 	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
-	"github.com/kshard/sigma/internal/compile"
+	"github.com/kshard/sigma/internal/compiler"
 	"github.com/kshard/sigma/internal/gen"
 	"github.com/kshard/sigma/vm"
 )
@@ -82,10 +82,10 @@ func TestX(t *testing.T) {
 		},
 	}
 
-	c := compile.New()
+	c := compiler.New()
 	c.Compile(e)
 
-	vmm, addr, reader := c.ReaderX("h")
+	vmm, addr, reader := c.Assemble("h")
 	fmt.Println(*vmm, addr, reader)
 
 	// raw, _ := json.Marshal(reader)
@@ -123,7 +123,7 @@ func TestX(t *testing.T) {
 	}
 
 	value := make([]any, 2)
-	xreader := vmm.Stream(addr, asmx.Compile(ctx))
+	xreader := vmm.Stream(addr, asmx.Link(ctx))
 
 	for {
 		if err := xreader.Read(value); err != nil {
@@ -270,7 +270,7 @@ func BenchmarkTx(bb *testing.B) {
 		},
 	}
 
-	c := compile.New()
+	c := compiler.New()
 	c.Compile(e)
 	// reader := c.Reader("h")
 

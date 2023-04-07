@@ -18,7 +18,7 @@
 
 */
 
-package compile
+package compiler
 
 import (
 	"fmt"
@@ -46,6 +46,7 @@ type Context struct {
 	Index int
 }
 
+// Create new instance of compiler
 func New() *Context {
 	return &Context{
 		Signs: make(map[string]*ast.Head),
@@ -57,37 +58,21 @@ func New() *Context {
 	}
 }
 
-// func (ctx *Context) Reader(goal string) *vm.Reader {
-// 	compiler := ctx.Rules[goal]
-// 	stream := compiler(ctx, nil)
-
-// 	vmm := vm.New(len(ctx.Heap))
-// 	for addr, val := range ctx.Const {
-// 		vmm.Heap.Put(addr, val)
-// 	}
-
-// 	head := ctx.Signs[goal]
-// 	addr := make([]vm.Addr, len(head.Terms))
-// 	for i, term := range head.Terms {
-// 		addr[i] = ctx.Heap[term.Name]
-// 	}
-
-// 	return vmm.Stream(addr, stream)
-// }
-
-func (ctx *Context) ReaderX(goal string) (*vm.VM, []vm.Addr, asm.Stream) {
+// Assemble the goal of σ-application into executable object.
+// It returns virtual machine, target relation and stream itself
+func (ctx *Context) Assemble(goal string) (*vm.VM, []vm.Addr, asm.Stream) {
 	compiler := ctx.Rules[goal]
 	stream := compiler(ctx, nil)
-
-	vmm := vm.New(len(ctx.Heap))
-	for addr, val := range ctx.Const {
-		vmm.Heap.Put(addr, val)
-	}
 
 	head := ctx.Signs[goal]
 	addr := make([]vm.Addr, len(head.Terms))
 	for i, term := range head.Terms {
 		addr[i] = ctx.Heap[term.Name]
+	}
+
+	vmm := vm.New(len(ctx.Heap))
+	for addr, val := range ctx.Const {
+		vmm.Heap.Put(addr, val)
 	}
 
 	return vmm, addr, stream
@@ -97,10 +82,7 @@ func (ctx *Context) Compile(rules ast.Rules) error {
 	for _, rule := range rules {
 		switch horn := rule.(type) {
 		case *ast.Fact:
-			ctx.Facts[horn.Stream.Name] = func(_ []vm.Addr) vm.Stream {
-				panic(fmt.Errorf("generator %s is not defined.", horn.Stream.Name))
-			}
-			// nil //=>horn.Generator(horn.Stream.Terms)
+			ctx.Facts[horn.Stream.Name] = func(_ []vm.Addr) vm.Stream { return nil }
 		case *ast.Horn:
 			ctx.Signs[horn.Head.Name] = horn.Head
 			ctx.Rules[horn.Head.Name] = ctx.horn(horn)
