@@ -196,9 +196,7 @@ func TestXxx(t *testing.T) {
 
 func BenchmarkTx(bb *testing.B) {
 	e := ast.Rules{
-		&ast.Fact{
-			Stream: &ast.Imply{Name: "f", Terms: ast.Terms{{Name: "s"}, {Name: "p"}, {Name: "o"}}},
-		},
+		ast.NewFact("f").Tuple("s", "p", "o"),
 
 		&ast.Horn{
 			Head: &ast.Head{Name: "h", Terms: ast.Terms{{Name: "name"}}},

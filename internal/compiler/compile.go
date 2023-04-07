@@ -82,7 +82,7 @@ func (ctx *Context) Compile(rules ast.Rules) error {
 	for _, rule := range rules {
 		switch horn := rule.(type) {
 		case *ast.Fact:
-			ctx.Facts[horn.Stream.Name] = func(_ []vm.Addr) vm.Stream { return nil }
+			ctx.Facts[horn.Name] = func(_ []vm.Addr) vm.Stream { return nil }
 		case *ast.Horn:
 			ctx.Signs[horn.Head.Name] = horn.Head
 			ctx.Rules[horn.Head.Name] = ctx.horn(horn)
