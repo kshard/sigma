@@ -41,8 +41,10 @@ const (
 	IF
 
 	SYMBOL
+	ATOM
 	STRING
 	NUMBER
+	DECIMAL
 )
 
 func isWhitespace(ch rune) bool {
@@ -50,7 +52,7 @@ func isWhitespace(ch rune) bool {
 }
 
 func isSymbol(ch rune) bool {
-	return ch == ':' || ch == '-' || ch == '(' || ch == ',' || ch == ')' || ch >= '.'
+	return ch == ':' || ch == '-' || ch == '(' || ch == ',' || ch == ')' || ch == '.'
 }
 
 func isLetter(ch rune) bool {
@@ -94,22 +96,25 @@ func (s *Scanner) Scan() Token {
 
 	case isLetter(ch):
 		s.unread()
+		return s.scanAtom()
+
+	case ch == '"':
+		s.unread()
 		return s.scanString()
 
 	case isNumber(ch):
 		s.unread()
 		return s.scanNumber()
 
-	case isSymbol(ch):
-		if ch == ':' {
-			if ch = s.read(); ch == '-' {
-				return Token{Kind: IF}
-			} else {
-				s.unread()
-				return Token{Kind: SYMBOL, Literal: ":"}
-			}
+	case ch == ':':
+		if ch = s.read(); ch == '-' {
+			return Token{Kind: IF}
+		} else {
+			s.unread()
+			return Token{Kind: SYMBOL, Literal: ":"}
 		}
 
+	case isSymbol(ch):
 		return Token{Kind: SYMBOL, Literal: string(ch)}
 
 	case ch == eof:
@@ -138,7 +143,7 @@ func (s *Scanner) scanWhitespace() Token {
 	return Token{Kind: WS, Literal: buf.String()}
 }
 
-func (s *Scanner) scanString() Token {
+func (s *Scanner) scanAtom() Token {
 	var buf bytes.Buffer
 	buf.WriteRune(s.read())
 
@@ -147,6 +152,24 @@ func (s *Scanner) scanString() Token {
 			break
 		} else if !isLetter(ch) && !isNumber(ch) && ch != '_' {
 			s.unread()
+			break
+		} else {
+			buf.WriteRune(ch)
+		}
+	}
+
+	return Token{Kind: ATOM, Literal: buf.String()}
+}
+
+func (s *Scanner) scanString() Token {
+	var buf bytes.Buffer
+	buf.WriteRune(s.read())
+
+	for {
+		if ch := s.read(); ch == eof {
+			break
+		} else if ch == '"' {
+			buf.WriteRune(ch)
 			break
 		} else {
 			buf.WriteRune(ch)
@@ -171,5 +194,23 @@ func (s *Scanner) scanNumber() Token {
 		}
 	}
 
-	return Token{Kind: NUMBER, Literal: buf.String()}
+	if ch := s.read(); ch != '.' {
+		s.unread()
+		return Token{Kind: NUMBER, Literal: buf.String()}
+	} else {
+		buf.WriteRune(ch)
+	}
+
+	for {
+		if ch := s.read(); ch == eof {
+			break
+		} else if !isNumber(ch) {
+			s.unread()
+			break
+		} else {
+			buf.WriteRune(ch)
+		}
+	}
+
+	return Token{Kind: DECIMAL, Literal: buf.String()}
 }

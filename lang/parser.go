@@ -23,19 +23,22 @@ package lang
 import (
 	"fmt"
 	"io"
+	"strconv"
+	"strings"
 
 	"github.com/kshard/sigma/ast"
 )
 
 type Parser struct {
-	s    *Scanner
-	head *Token
-	last *Token
+	s     *Scanner
+	index int
+	head  *Token
+	last  *Token
 }
 
 // NewParser returns a new instance of Parser.
 func NewParser(r io.Reader) *Parser {
-	return &Parser{s: NewScanner(r)}
+	return &Parser{s: NewScanner(r), index: 0}
 }
 
 func (p *Parser) scan() (token Token) {
@@ -81,8 +84,8 @@ func (p *Parser) Parse() (ast.Rules, error) {
 	}
 }
 
-// STRING ( TERMS ) :- BODY .
-// STRING ( TERMS ) .
+// ATOM ( TERMS ) :- BODY .
+// ATOM ( TERMS ) .
 func (p *Parser) parseRule() (ast.Rule, error) {
 	imply, err := p.parseImply()
 	if err != nil {
@@ -118,6 +121,7 @@ func (p *Parser) parseRule() (ast.Rule, error) {
 	}
 }
 
+// ATOM ( TERMS ) , BODY
 func (p *Parser) parseImplies() (ast.Implies, error) {
 	implies := make(ast.Implies, 0)
 
@@ -137,13 +141,13 @@ func (p *Parser) parseImplies() (ast.Implies, error) {
 	}
 }
 
-// STRING ( TERMS )
+// ATOM ( TERMS )
 func (p *Parser) parseImply() (*ast.Imply, error) {
 	imply := new(ast.Imply)
 
 	token := p.scanSkipWhitespace()
-	if token.Kind != STRING {
-		return nil, fmt.Errorf("syntax error: Imply expect STRING, got %+v", token)
+	if token.Kind != ATOM {
+		return nil, fmt.Errorf("syntax error: Imply expect ATOM, got %+v", token)
 	}
 
 	imply.Name = token.Literal
@@ -188,16 +192,43 @@ func (p *Parser) parseTerms() (ast.Terms, error) {
 	}
 }
 
-// STRING
+// ATOM
 // NUMBER
+// DECIMAL
 // " STRING "
 func (p *Parser) parseTerm() (*ast.Term, error) {
 	token := p.scanSkipWhitespace()
 	switch {
-	case token.Kind == STRING:
+	case token.Kind == ATOM:
 		return &ast.Term{Name: token.Literal}, nil
-	// case token.Kind == NUMBER:
-	// case token.Kind == SYMBOL && token.Literal == `"`:
+
+	case token.Kind == STRING:
+		name := "xs" + strconv.Itoa(p.index)
+		p.index++
+		return &ast.Term{Name: name, Value: strings.Trim(token.Literal, `"`)}, nil
+
+	case token.Kind == NUMBER:
+		name := "xn" + strconv.Itoa(p.index)
+		p.index++
+
+		val, err := strconv.Atoi(token.Literal)
+		if err != nil {
+			return nil, fmt.Errorf("syntax error: invalid int %+v, %s", token, err)
+		}
+
+		return &ast.Term{Name: name, Value: val}, nil
+
+	case token.Kind == DECIMAL:
+		name := "xf" + strconv.Itoa(p.index)
+		p.index++
+
+		val, err := strconv.ParseFloat(token.Literal, 64)
+		if err != nil {
+			return nil, fmt.Errorf("syntax error: invalid float %+v, %s", token, err)
+		}
+
+		return &ast.Term{Name: name, Value: val}, nil
+
 	default:
 		return nil, fmt.Errorf("syntax error: Term do not expect %+v", token)
 	}
