@@ -20,17 +20,21 @@
 
 package vm
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/kshard/xsd"
+)
 
 //
 // The file defines random access memory (heap) model for VM.
 //
 
 // Heap of VM
-type Heap []any
+type Heap []xsd.Value
 
 // Put writes value to heap by the address
-func (heap *Heap) Put(addr Addr, val any) {
+func (heap *Heap) Put(addr Addr, val xsd.Value) {
 	if !addr.IsWritable() {
 		return
 	}
@@ -38,7 +42,7 @@ func (heap *Heap) Put(addr Addr, val any) {
 }
 
 // Get reads value from heap
-func (heap *Heap) Get(addr Addr) any {
+func (heap *Heap) Get(addr Addr) xsd.Value {
 	if addr.IsWritable() {
 		return nil
 	}
@@ -46,7 +50,7 @@ func (heap *Heap) Get(addr Addr) any {
 	return (*heap)[addr.Value()]
 }
 
-func (heap *Heap) UnsafeGet(addr Addr) any {
+func (heap *Heap) UnsafeGet(addr Addr) xsd.Value {
 	return (*heap)[addr.Value()]
 }
 
@@ -54,12 +58,13 @@ func (heap *Heap) UnsafeGet(addr Addr) any {
 func (heap *Heap) Dump() {
 	fmt.Print("[")
 	for _, v := range *heap {
-		switch x := v.(type) {
-		case *any:
-			fmt.Printf(" %v ", *x)
-		default:
-			fmt.Printf(" %v ", x)
-		}
+		fmt.Printf(" %v ", v)
+		// switch x := v.(type) {
+		// case *any:
+		// 	fmt.Printf(" %v ", *x)
+		// default:
+		// 	fmt.Printf(" %v ", x)
+		// }
 	}
 	fmt.Println("]")
 }

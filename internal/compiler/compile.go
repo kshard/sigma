@@ -25,6 +25,7 @@ import (
 
 	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
+	"github.com/kshard/xsd"
 
 	"github.com/kshard/sigma/vm"
 )
@@ -42,7 +43,7 @@ type Context struct {
 	Rules Rules
 	Facts map[string]vm.Generator
 	Heap  Heap
-	Const map[vm.Addr]any
+	Const map[vm.Addr]xsd.Value
 	Index int
 }
 
@@ -53,7 +54,7 @@ func New() *Context {
 		Rules: Rules{},
 		Facts: make(map[string]vm.Generator),
 		Heap:  Heap{},
-		Const: make(map[vm.Addr]any),
+		Const: make(map[vm.Addr]xsd.Value),
 		Index: 0,
 	}
 }
@@ -168,7 +169,7 @@ func (ctx *Context) alloc(term *ast.Term) vm.Addr {
 
 		if term.Value != nil {
 			ctx.Heap[term.Name] = addr
-			ctx.Const[addr] = &term.Value
+			ctx.Const[addr] = term.Value
 			// fmt.Printf("==> %s = %v\n", term.Name, addr.ReadOnly())
 			return addr.ReadOnly()
 		}

@@ -27,6 +27,7 @@ import (
 	"strings"
 
 	"github.com/kshard/sigma/ast"
+	"github.com/kshard/xsd"
 )
 
 type Parser struct {
@@ -205,7 +206,7 @@ func (p *Parser) parseTerm() (*ast.Term, error) {
 	case token.Kind == STRING:
 		name := "xs" + strconv.Itoa(p.index)
 		p.index++
-		return &ast.Term{Name: name, Value: strings.Trim(token.Literal, `"`)}, nil
+		return &ast.Term{Name: name, Value: xsd.From(strings.Trim(token.Literal, `"`))}, nil
 
 	case token.Kind == NUMBER:
 		name := "xn" + strconv.Itoa(p.index)
@@ -216,7 +217,7 @@ func (p *Parser) parseTerm() (*ast.Term, error) {
 			return nil, fmt.Errorf("syntax error: invalid int %+v, %s", token, err)
 		}
 
-		return &ast.Term{Name: name, Value: val}, nil
+		return &ast.Term{Name: name, Value: xsd.From(val)}, nil
 
 	case token.Kind == DECIMAL:
 		name := "xf" + strconv.Itoa(p.index)
@@ -227,7 +228,7 @@ func (p *Parser) parseTerm() (*ast.Term, error) {
 			return nil, fmt.Errorf("syntax error: invalid float %+v, %s", token, err)
 		}
 
-		return &ast.Term{Name: name, Value: val}, nil
+		return &ast.Term{Name: name, Value: xsd.From(val)}, nil
 
 	default:
 		return nil, fmt.Errorf("syntax error: Term do not expect %+v", token)

@@ -26,6 +26,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/kshard/xsd"
 )
 
 // Kind of ast node
@@ -41,7 +43,7 @@ const (
 // Term defines complex term expressions of σ-expression
 type Term struct {
 	Name  string
-	Value any
+	Value xsd.Value
 }
 
 func (*Term) Node() Kind { return NodeTerm }
@@ -63,7 +65,7 @@ type Imply struct {
 	Terms Terms
 }
 
-func (i *Imply) Term(term string, value ...any) *Imply {
+func (i *Imply) Term(term string, value ...xsd.Value) *Imply {
 	t := &Term{Name: term}
 	if len(value) != 0 {
 		t.Value = value[0]

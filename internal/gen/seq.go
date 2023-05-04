@@ -22,19 +22,20 @@ package gen
 
 import (
 	"github.com/kshard/sigma/vm"
+	"github.com/kshard/xsd"
 )
 
 // seq type
 type Seq struct {
 	addr []vm.Addr
-	seq  [][]any
+	seq  [][]xsd.Value
 	pos  int
 }
 
 /*
 Seq generates sequence of values
 */
-func NewSeq(xs [][]any) func(...vm.Addr) *Seq {
+func NewSeq(xs [][]xsd.Value) func(...vm.Addr) *Seq {
 	return func(addr ...vm.Addr) *Seq {
 		return &Seq{addr: addr, seq: xs, pos: 0}
 	}
@@ -52,7 +53,7 @@ func (seq *Seq) Read(heap *vm.Heap) error {
 
 	v := seq.seq[seq.pos]
 	for i, addr := range seq.addr {
-		heap.Put(addr, &v[i])
+		heap.Put(addr, v[i])
 	}
 
 	seq.pos++
@@ -61,14 +62,14 @@ func (seq *Seq) Read(heap *vm.Heap) error {
 
 type Values struct {
 	addr vm.Addr
-	seq  []any
+	seq  []xsd.Value
 	pos  int
 }
 
 /*
 Values generates sequence of values
 */
-func NewValues(xs []any) func(...vm.Addr) *Values {
+func NewValues(xs []xsd.Value) func(...vm.Addr) *Values {
 	return func(addr ...vm.Addr) *Values {
 		return &Values{addr: addr[0], seq: xs, pos: 0}
 	}
@@ -84,7 +85,7 @@ func (seq *Values) Read(heap *vm.Heap) error {
 		return vm.EndOfStream
 	}
 
-	heap.Put(seq.addr, &seq.seq[seq.pos])
+	heap.Put(seq.addr, seq.seq[seq.pos])
 
 	seq.pos++
 	return nil

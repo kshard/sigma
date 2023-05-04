@@ -28,6 +28,7 @@ import (
 	"github.com/kshard/sigma/asm"
 	"github.com/kshard/sigma/ast"
 	"github.com/kshard/sigma/internal/gen"
+	"github.com/kshard/xsd"
 )
 
 func queryMatchPerson() sigma.Reader {
@@ -37,8 +38,8 @@ func queryMatchPerson() sigma.Reader {
 			ast.NewHead("h").Tuple("s"),
 			ast.NewExpr("f").
 				Term("s").
-				Term("t1", "name").
-				Term("t2", "Ridley Scott"),
+				Term("t1", xsd.From("name")).
+				Term("t2", xsd.From("Ridley Scott")),
 		),
 	}
 
@@ -79,11 +80,11 @@ func queryMatchMovieByYear() sigma.Reader {
 			ast.NewHead("h").Tuple("s", "title"),
 			ast.NewExpr("f").
 				Term("s").
-				Term("t1", "year").
-				Term("t2", 1987),
+				Term("t1", xsd.From("year")).
+				Term("t2", xsd.From(1987)),
 			ast.NewExpr("f").
 				Term("s").
-				Term("t3", "title").
+				Term("t3", xsd.From("title")).
 				Term("title"),
 		),
 	}
@@ -130,15 +131,15 @@ func queryDiscoverAllActorsFromMovie() sigma.Reader {
 			ast.NewHead("h").Tuple("name"),
 			ast.NewExpr("f").
 				Term("m").
-				Term("t1", "title").
-				Term("t2", "Lethal Weapon"),
+				Term("t1", xsd.From("title")).
+				Term("t2", xsd.From("Lethal Weapon")),
 			ast.NewExpr("f").
 				Term("m").
-				Term("t3", "cast").
+				Term("t3", xsd.From("cast")).
 				Term("p"),
 			ast.NewExpr("f").
 				Term("p").
-				Term("t4", "name").
+				Term("t4", xsd.From("name")).
 				Term("name"),
 		),
 	}

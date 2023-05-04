@@ -20,6 +20,8 @@
 
 package vm
 
+import "github.com/kshard/xsd"
+
 //
 // The file defines stream reader interface.
 //
@@ -36,11 +38,11 @@ type Reader struct {
 }
 
 // ToSeq evaluates the stream and copy context into sequence of relation
-func (reader *Reader) ToSeq() [][]any {
-	seq := [][]any{}
+func (reader *Reader) ToSeq() [][]xsd.Value {
+	seq := [][]xsd.Value{}
 
 	for {
-		val := make([]any, len(reader.addr))
+		val := make([]xsd.Value, len(reader.addr))
 		if err := reader.Read(val); err != nil {
 			break
 		}
@@ -51,7 +53,7 @@ func (reader *Reader) ToSeq() [][]any {
 }
 
 // Read "car" (head of the stream) into container
-func (reader *Reader) Read(seq []any) error {
+func (reader *Reader) Read(seq []xsd.Value) error {
 	if reader.closed {
 		if err := reader.stream.Init(reader.heap); err != nil {
 			return err
@@ -71,17 +73,18 @@ func (reader *Reader) Read(seq []any) error {
 
 // VM's heap is only the snapshot of current state.
 // The heap values MUST be copied on the return to client.
-func (reader *Reader) copyHead(seq []any) {
+func (reader *Reader) copyHead(seq []xsd.Value) {
 	if seq == nil {
 		return
 	}
 
 	for i, addr := range reader.addr {
-		switch x := reader.heap.Get(addr).(type) {
-		case *any:
-			seq[i] = *x
-		default:
-			seq[i] = x
-		}
+		seq[i] = reader.heap.Get(addr)
+		// switch x := reader.heap.Get(addr).(type) {
+		// case *any:
+		// 	seq[i] = *x
+		// default:
+		// 	seq[i] = x
+		// }
 	}
 }

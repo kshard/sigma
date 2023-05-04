@@ -25,6 +25,7 @@ import (
 	"github.com/kshard/sigma/ast"
 	"github.com/kshard/sigma/internal/compiler"
 	"github.com/kshard/sigma/vm"
+	"github.com/kshard/xsd"
 )
 
 //
@@ -33,8 +34,8 @@ import (
 
 // Reader is a stream produced by evaluation of rules
 type Reader interface {
-	ToSeq() [][]any
-	Read([]any) error
+	ToSeq() [][]xsd.Value
+	Read([]xsd.Value) error
 }
 
 type VM struct {

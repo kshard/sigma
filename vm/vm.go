@@ -22,6 +22,8 @@ package vm
 
 import (
 	"errors"
+
+	"github.com/kshard/xsd"
 )
 
 //
@@ -77,7 +79,7 @@ func (vm *VM) Stream(head []Addr, stream Stream) *Reader {
 }
 
 // Evaluates Stream, return sequence of relations
-func (vm *VM) Run(head []Addr, stream Stream) [][]any {
+func (vm *VM) Run(head []Addr, stream Stream) [][]xsd.Value {
 	return vm.Stream(head, stream).ToSeq()
 }
 

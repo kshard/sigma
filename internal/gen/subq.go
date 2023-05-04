@@ -22,6 +22,7 @@ package gen
 
 import (
 	"github.com/kshard/sigma/vm"
+	"github.com/kshard/xsd"
 )
 
 /*
@@ -29,19 +30,19 @@ seq ...
 */
 type SubQ struct {
 	addr []vm.Addr
-	seq  [][]any
-	pat  []any
+	seq  [][]xsd.Value
+	pat  []xsd.Value
 	pos  int
 }
 
 /*
 Stream ...
 */
-func NewSubQ(addr []vm.Addr, xs [][]any) *SubQ {
+func NewSubQ(addr []vm.Addr, xs [][]xsd.Value) *SubQ {
 	return &SubQ{
 		addr: addr,
 		seq:  xs,
-		pat:  make([]any, len(addr)),
+		pat:  make([]xsd.Value, len(addr)),
 		pos:  0,
 	}
 }
@@ -50,7 +51,7 @@ func (seq *SubQ) Init(heap *vm.Heap) error {
 	// build sub-query
 	for i, addr := range seq.addr {
 		if !addr.IsWritable() {
-			seq.pat[i] = *heap.Get(addr).(*any)
+			seq.pat[i] = heap.Get(addr)
 		} else {
 			seq.pat[i] = nil
 		}
@@ -68,7 +69,7 @@ func (seq *SubQ) Read(heap *vm.Heap) error {
 	v := seq.seq[seq.pos]
 	for i, addr := range seq.addr {
 		if addr.IsWritable() {
-			heap.Put(addr, &v[i])
+			heap.Put(addr, v[i])
 		}
 	}
 
@@ -76,7 +77,7 @@ func (seq *SubQ) Read(heap *vm.Heap) error {
 	return nil
 }
 
-func (seq *SubQ) Skip(val []any) error {
+func (seq *SubQ) Skip(val []xsd.Value) error {
 	for {
 		if len(seq.seq) == seq.pos {
 			return vm.EndOfStream
@@ -84,7 +85,7 @@ func (seq *SubQ) Skip(val []any) error {
 
 		eq := true
 		for i, x := range val {
-			if x != nil && seq.seq[seq.pos][i] != x {
+			if x != nil && xsd.Compare(seq.seq[seq.pos][i], x) != 0 {
 				eq = false
 			}
 		}

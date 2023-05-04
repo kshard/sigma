@@ -28,6 +28,7 @@ import (
 	"github.com/kshard/sigma/ast"
 	"github.com/kshard/sigma/internal/compiler"
 	"github.com/kshard/sigma/internal/gen"
+	"github.com/kshard/xsd"
 )
 
 func TestX(t *testing.T) {
@@ -38,29 +39,29 @@ func TestX(t *testing.T) {
 			ast.NewHead("a").Tuple("movie", "cast"),
 			ast.NewExpr("f").
 				Term("m").
-				Term("t1", "title").
+				Term("t1", xsd.From("title")).
 				Term("movie"),
 			ast.NewExpr("f").
 				Term("m").
-				Term("c1", "cast").
+				Term("c1", xsd.From("cast")).
 				Term("cast"),
 		),
 
 		ast.NewHorn(
 			ast.NewHead("h").Tuple("name", "name1"),
 			ast.NewExpr("a").
-				Term("t2", "Lethal Weapon").
+				Term("t2", xsd.From("Lethal Weapon")).
 				Term("p"),
 			ast.NewExpr("f").
 				Term("p").
-				Term("n1", "name").
+				Term("n1", xsd.From("name")).
 				Term("name"),
 			ast.NewExpr("a").
-				Term("t3", "Mad Max").
+				Term("t3", xsd.From("Mad Max")).
 				Term("s"),
 			ast.NewExpr("f").
 				Term("s").
-				Term("n1", "name").
+				Term("n1", xsd.From("name")).
 				Term("name1"),
 		),
 	}
@@ -75,7 +76,7 @@ func TestX(t *testing.T) {
 	ctx := asm.NewContext().Add("f", gen.FactsIMDB)
 	reader := machine.Stream(shape, code.Link(ctx))
 
-	value := make([]any, len(shape))
+	value := make([]xsd.Value, len(shape))
 
 	for {
 		if err := reader.Read(value); err != nil {
@@ -203,17 +204,17 @@ func BenchmarkTx(bb *testing.B) {
 			Body: []*ast.Imply{
 				{Name: "f", Terms: ast.Terms{
 					{Name: "m"},
-					{Name: "t1", Value: "title"},
-					{Name: "t2", Value: "Lethal Weapon"},
+					{Name: "t1", Value: xsd.From("title")},
+					{Name: "t2", Value: xsd.From("Lethal Weapon")},
 				}},
 				{Name: "f", Terms: ast.Terms{
 					{Name: "m"},
-					{Name: "c1", Value: "cast"},
+					{Name: "c1", Value: xsd.From("cast")},
 					{Name: "p"},
 				}},
 				{Name: "f", Terms: ast.Terms{
 					{Name: "p"},
-					{Name: "n1", Value: "name"},
+					{Name: "n1", Value: xsd.From("name")},
 					{Name: "name"},
 				}},
 			},
