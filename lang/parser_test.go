@@ -19,6 +19,8 @@ func TestXxx(t *testing.T) {
 			f(m, "title", movie),
 			f(m, "cast", cast).
 
+		b(movie) :- f(m, rdf:type, movie).
+
 		h(name, eman) :-
 			a("Lethal Weapon", p),
 			f(p, "name", name),
@@ -31,7 +33,7 @@ func TestXxx(t *testing.T) {
 
 	parser := lang.NewParser(buf)
 	rules, err := parser.Parse()
-	fmt.Printf("%s, %+v\n", err, rules)
+	fmt.Printf("%v, %+v\n", err, rules)
 
 	machine, err := sigma.New("h", rules)
 	if err != nil {

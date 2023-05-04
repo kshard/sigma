@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/fogfish/curie"
 	"github.com/kshard/sigma/ast"
 	"github.com/kshard/xsd"
 )
@@ -194,6 +195,7 @@ func (p *Parser) parseTerms() (ast.Terms, error) {
 }
 
 // ATOM
+// < IRI >
 // NUMBER
 // DECIMAL
 // " STRING "
@@ -203,12 +205,18 @@ func (p *Parser) parseTerm() (*ast.Term, error) {
 	case token.Kind == ATOM:
 		return &ast.Term{Name: token.Literal}, nil
 
-	case token.Kind == STRING:
+	case token.Kind == XSD_ANYURI:
+		name := "xu" + strconv.Itoa(p.index)
+		p.index++
+		iri := curie.IRI(strings.Trim(token.Literal, `<>`))
+		return &ast.Term{Name: name, Value: xsd.ToAnyURI(iri)}, nil
+
+	case token.Kind == XSD_STRING:
 		name := "xs" + strconv.Itoa(p.index)
 		p.index++
 		return &ast.Term{Name: name, Value: xsd.From(strings.Trim(token.Literal, `"`))}, nil
 
-	case token.Kind == NUMBER:
+	case token.Kind == XSD_INTEGER:
 		name := "xn" + strconv.Itoa(p.index)
 		p.index++
 
@@ -219,7 +227,7 @@ func (p *Parser) parseTerm() (*ast.Term, error) {
 
 		return &ast.Term{Name: name, Value: xsd.From(val)}, nil
 
-	case token.Kind == DECIMAL:
+	case token.Kind == XSD_DECIMAL:
 		name := "xf" + strconv.Itoa(p.index)
 		p.index++
 

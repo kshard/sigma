@@ -42,9 +42,10 @@ const (
 
 	SYMBOL
 	ATOM
-	STRING
-	NUMBER
-	DECIMAL
+	XSD_ANYURI
+	XSD_STRING
+	XSD_INTEGER
+	XSD_DECIMAL
 )
 
 func isWhitespace(ch rune) bool {
@@ -102,6 +103,10 @@ func (s *Scanner) Scan() Token {
 		s.unread()
 		return s.scanString()
 
+	case ch == '<':
+		s.unread()
+		return s.scanAnyURI()
+
 	case isNumber(ch):
 		s.unread()
 		return s.scanNumber()
@@ -158,7 +163,25 @@ func (s *Scanner) scanAtom() Token {
 		}
 	}
 
-	return Token{Kind: ATOM, Literal: buf.String()}
+	if ch := s.read(); ch != ':' {
+		s.unread()
+		return Token{Kind: ATOM, Literal: buf.String()}
+	} else {
+		buf.WriteRune(ch)
+	}
+
+	for {
+		if ch := s.read(); ch == eof {
+			break
+		} else if !isLetter(ch) && !isNumber(ch) && ch != '_' {
+			s.unread()
+			break
+		} else {
+			buf.WriteRune(ch)
+		}
+	}
+
+	return Token{Kind: XSD_ANYURI, Literal: buf.String()}
 }
 
 func (s *Scanner) scanString() Token {
@@ -176,7 +199,25 @@ func (s *Scanner) scanString() Token {
 		}
 	}
 
-	return Token{Kind: STRING, Literal: buf.String()}
+	return Token{Kind: XSD_STRING, Literal: buf.String()}
+}
+
+func (s *Scanner) scanAnyURI() Token {
+	var buf bytes.Buffer
+	buf.WriteRune(s.read())
+
+	for {
+		if ch := s.read(); ch == eof {
+			break
+		} else if ch == '>' {
+			buf.WriteRune(ch)
+			break
+		} else {
+			buf.WriteRune(ch)
+		}
+	}
+
+	return Token{Kind: XSD_ANYURI, Literal: buf.String()}
 }
 
 func (s *Scanner) scanNumber() Token {
@@ -196,7 +237,7 @@ func (s *Scanner) scanNumber() Token {
 
 	if ch := s.read(); ch != '.' {
 		s.unread()
-		return Token{Kind: NUMBER, Literal: buf.String()}
+		return Token{Kind: XSD_INTEGER, Literal: buf.String()}
 	} else {
 		buf.WriteRune(ch)
 	}
@@ -212,5 +253,5 @@ func (s *Scanner) scanNumber() Token {
 		}
 	}
 
-	return Token{Kind: DECIMAL, Literal: buf.String()}
+	return Token{Kind: XSD_DECIMAL, Literal: buf.String()}
 }
