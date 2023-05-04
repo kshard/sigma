@@ -59,12 +59,6 @@ func (heap *Heap) Dump() {
 	fmt.Print("[")
 	for _, v := range *heap {
 		fmt.Printf(" %v ", v)
-		// switch x := v.(type) {
-		// case *any:
-		// 	fmt.Printf(" %v ", *x)
-		// default:
-		// 	fmt.Printf(" %v ", x)
-		// }
 	}
 	fmt.Println("]")
 }

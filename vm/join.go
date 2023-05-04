@@ -42,9 +42,6 @@ type join struct {
 	rhs Stream
 }
 
-// TODO: handle end of stream (rhs) so that evaluation continues
-// If rhs finishes with end of stream lhs do not continue
-
 func (join *join) Init(heap *Heap) error {
 	if err := join.lhs.Init(heap); err != nil {
 		return err
@@ -70,10 +67,6 @@ func (join *join) Read(heap *Heap) error {
 		return err
 	}
 
-	// if err := join.rhs.Init(heap); err != nil {
-	// 	return err
-	// }
-	// return nil
 	for {
 		if err := join.rhs.Init(heap); err != nil {
 			if err := join.lhs.Read(heap); err != nil {

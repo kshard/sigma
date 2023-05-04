@@ -80,11 +80,5 @@ func (reader *Reader) copyHead(seq []xsd.Value) {
 
 	for i, addr := range reader.addr {
 		seq[i] = reader.heap.Get(addr)
-		// switch x := reader.heap.Get(addr).(type) {
-		// case *any:
-		// 	seq[i] = *x
-		// default:
-		// 	seq[i] = x
-		// }
 	}
 }
