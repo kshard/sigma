@@ -47,11 +47,15 @@ func (join *join) Init(heap *Heap) error {
 		return err
 	}
 
-	if err := join.rhs.Init(heap); err != nil {
-		return err
+	for {
+		if err := join.rhs.Init(heap); err != nil {
+			if err := join.lhs.Read(heap); err != nil {
+				return err
+			}
+		} else {
+			return nil
+		}
 	}
-
-	return nil
 }
 
 func (join *join) Read(heap *Heap) error {
@@ -63,9 +67,13 @@ func (join *join) Read(heap *Heap) error {
 		return err
 	}
 
-	if err := join.rhs.Init(heap); err != nil {
-		return err
+	for {
+		if err := join.rhs.Init(heap); err != nil {
+			if err := join.lhs.Read(heap); err != nil {
+				return err
+			}
+		} else {
+			return nil
+		}
 	}
-
-	return nil
 }

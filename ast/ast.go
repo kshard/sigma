@@ -26,6 +26,8 @@ package ast
 
 import (
 	"fmt"
+
+	"github.com/kshard/xsd"
 )
 
 // Kind of ast node
@@ -41,7 +43,7 @@ const (
 // Term defines complex term expressions of σ-expression
 type Term struct {
 	Name  string
-	Value any
+	Value xsd.Value
 }
 
 func (*Term) Node() Kind { return NodeTerm }
@@ -63,7 +65,7 @@ type Imply struct {
 	Terms Terms
 }
 
-func (i *Imply) Term(term string, value ...any) *Imply {
+func (i *Imply) Term(term string, value ...xsd.Value) *Imply {
 	t := &Term{Name: term}
 	if len(value) != 0 {
 		t.Value = value[0]
@@ -87,9 +89,7 @@ type Rules []Rule
 
 // σ-expression, Generator of ground facts
 // TODO: deprecate type (see Head)
-type Fact struct {
-	Stream *Imply
-}
+type Fact Imply
 
 func (*Fact) Node() Kind { return NodeFact }
 func (*Fact) Rule() Kind { return NodeFact }
@@ -97,7 +97,7 @@ func (*Fact) Rule() Kind { return NodeFact }
 // Helper configs Fact Node with Terms
 func (f *Fact) Tuple(term ...string) *Fact {
 	for _, t := range term {
-		f.Stream.Terms = append(f.Stream.Terms, &Term{Name: t})
+		f.Terms = append(f.Terms, &Term{Name: t})
 	}
 
 	return f
@@ -105,7 +105,7 @@ func (f *Fact) Tuple(term ...string) *Fact {
 
 // Helper instantiates Fact Node
 func NewFact(name string) *Fact {
-	return &Fact{Stream: &Imply{Name: name, Terms: make(Terms, 0)}}
+	return &Fact{Name: name, Terms: make(Terms, 0)}
 }
 
 // Head of Horn clause

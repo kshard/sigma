@@ -20,7 +20,8 @@
 
 package vm
 
-//
+import "github.com/kshard/xsd"
+
 type eq struct {
 	x      []Addr
 	y      []Addr
@@ -37,9 +38,9 @@ func (eq *eq) Init(heap *Heap) error {
 	}
 
 	for i, addr := range eq.x {
-		vx := (*heap)[addr].(*any)
-		vy := (*heap)[eq.y[i]].(*any)
-		if *vx != *vy {
+		vx := (*heap)[addr]
+		vy := (*heap)[eq.y[i]]
+		if xsd.Compare(vx, vy) != 0 {
 			return eq.Read(heap)
 		}
 	}
@@ -53,9 +54,9 @@ func (eq *eq) Read(heap *Heap) error {
 	}
 
 	for i, addr := range eq.x {
-		vx := (*heap)[addr].(*any)
-		vy := (*heap)[eq.y[i]].(*any)
-		if *vx != *vy {
+		vx := (*heap)[addr]
+		vy := (*heap)[eq.y[i]]
+		if xsd.Compare(vx, vy) != 0 {
 			return eq.Read(heap)
 		}
 	}
